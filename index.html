@@ -263,7 +263,7 @@ th{color:#9bd49e}
 <section id="unlock">
   <div class="card">
     <div class="center">
-      <h2 class="green">🌿 Calculator</h2>
+        <h2 class="green">🌿 Calculator</h2>
       <p class="muted" style="margin-top:5px">Pure quality to the power of infinity.</p>
     </div>
     <div id="calcDisplay" style="margin-top:14px">0</div>
@@ -584,10 +584,8 @@ th{color:#9bd49e}
    NEVER put service_role or RESEND API keys here.
    ============================================================ */
 
-
 const SUPABASE_URL = "https://gzcxheoeouwuoybyowvy.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd6Y3hoZW9lb3V3dW95Ynlvd3Z5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY1ODkyMjAsImV4cCI6MjEwMjE2NTIyMH0.8gjxL7ig-WfOoc0VQC3EIDQx6NDZPBfR0I7gd82gA2w";
-
 
 const CHAT_BUCKET = "chat-images";
 const ACCESS_CODE = 0.7734;
@@ -602,13 +600,7 @@ function getPasswordResetRedirect(){
 }
 
 function isPasswordRecovery(){
-  const hash=window.location.hash || "";
-  const search=window.location.search || "";
-  // Supabase may return recovery links using either the implicit-flow
-  // hash (type=recovery) or the PKCE query parameter (code=...).
-  return /(?:^|[&#?])type=recovery(?:&|$)/i.test(hash) ||
-    /(?:^|[&?])type=recovery(?:&|$)/i.test(search) ||
-    /(?:^|[&?])code=[^&]+/i.test(search);
+  return /type=recovery/i.test(window.location.hash || "");
 }
 
 function showResetPassword(){
@@ -629,7 +621,6 @@ let sb = null;
 let currentUser = null;
 let currentProfile = null;
 let afterLoginInProgress = false;
-let passwordRecoveryActive = false;
 
 let map = null;
 let marker = null;
@@ -747,14 +738,6 @@ function calcClick(k){
 
 /* ---------- Init / Auth ---------- */
 
-// Password-recovery links must bypass the calculator gate.
-// Normal visits still use the calculator gate exactly as before.
-if(isPasswordRecovery()){
-  $("unlock").classList.add("hidden");
-  $("store").style.display="block";
-  init();
-}
-
 async function init(){
   if(!window.supabase){
     toast("Supabase library failed to load.", true);
@@ -768,34 +751,17 @@ async function init(){
 
   sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
 
-  // A Supabase recovery email can arrive in two formats: the older implicit
-  // flow (tokens in the URL hash) or the PKCE flow (a ?code=... query).
-  // Exchange the PKCE code BEFORE getSession(), otherwise the recovery link
-  // can look like an ordinary visit and fall through to the calculator gate.
-  const recoveryLink=isPasswordRecovery();
-  if(recoveryLink){
-    const code=new URLSearchParams(window.location.search).get("code");
-    if(code){
-      const {error:codeError}=await sb.auth.exchangeCodeForSession(code);
-      if(codeError){
-        toast("This password recovery link is invalid or expired. Please request a new one.",true);
-        return;
-      }
-    }
-  }
-
   const {data:{session}}=await sb.auth.getSession();
-  if(recoveryLink){
-    if(!session?.user){
-      toast("Password recovery session could not be established. Please request a new reset email.",true);
-      return;
-    }
-    passwordRecoveryActive=true;
-    currentUser=session.user;
-    if(session.user.email){
-      $("loginEmail").value=session.user.email;
-      try{sessionStorage.setItem("reset_email",session.user.email);}catch(e){}
-    }
+
+  /*
+     PASSWORD RECOVERY MUST ALWAYS STOP AT THE RESET FORM.
+     Supabase creates a temporary authenticated recovery session from the
+     email link. That session is intentionally NOT passed to afterLogin(),
+     otherwise the recovery link would open the normal dashboard directly.
+  */
+  const recovery=isPasswordRecovery();
+  if(recovery){
+    currentUser=session?.user || null;
     showResetPassword();
   }else if(session?.user){
     currentUser=session.user;
@@ -803,16 +769,12 @@ async function init(){
   }
 
   sb.auth.onAuthStateChange(async (_event,session)=>{
-    if(_event === "PASSWORD_RECOVERY" || passwordRecoveryActive || isPasswordRecovery()){
-      passwordRecoveryActive=true;
-      currentUser=session?.user || currentUser || null;
-      if(session?.user?.email){
-        $("loginEmail").value=session.user.email;
-        try{sessionStorage.setItem("reset_email",session.user.email);}catch(e){}
-      }
+    if(_event === "PASSWORD_RECOVERY"){
+      currentUser=session?.user || null;
       showResetPassword();
       return;
     }
+    if(recovery)return;
     if(session?.user && !currentUser){
       currentUser=session.user;
       await afterLogin();
@@ -865,20 +827,16 @@ async function updatePassword(){
   $("resetPasswordBtn").disabled=false;
   $("resetPasswordBtn").textContent="Update password";
   if(error) return toast(error.message,true);
-  const resetEmail=currentUser?.email || sessionStorage.getItem("reset_email") || "";
   $("resetPass").value="";
   $("resetPassConfirm").value="";
-  $("loginPass").value="";
-  if(resetEmail) $("loginEmail").value=resetEmail;
-  currentUser=null;
-  currentProfile=null;
-  passwordRecoveryActive=false;
   try{await sb.auth.signOut();}catch(e){}
-  try{sessionStorage.removeItem("reset_email");}catch(e){}
-  const cleanUrl=window.location.pathname + window.location.search;
-  try{window.history.replaceState({},document.title,cleanUrl);}catch(e){}
+  if(window.history?.replaceState)
+    window.history.replaceState({},document.title,window.location.pathname+window.location.search);
   showLoginAuth();
-  toast("Password updated successfully. Please log in again with your new password.");
+  $("loginEmail").value=currentUser?.email || $("loginEmail").value;
+  $("loginPass").value="";
+  currentUser=null;
+  toast("Password updated successfully. You can now log in with your new password.");
 }
 
 
@@ -1317,23 +1275,7 @@ async function getUnreadCounts(orderIds){
 
   if(error) return result;
 
-  /* Closed/delivered orders must never contribute unread chat counts.
-     Their conversation is considered closed together with the order. */
-  const closedOrderIds=new Set();
-  try{
-    const {data:closedOrders}=await sb.from("orders")
-      .select("id,status")
-      .in("id",orderIds);
-    (closedOrders||[]).forEach(o=>{
-      if(o.status==="delivered" || o.status==="closed" || o.status==="completed")
-        closedOrderIds.add(o.id);
-    });
-  }catch(e){
-    console.warn("Closed order unread check:",e.message);
-  }
-
   (data||[]).forEach(m=>{
-    if(closedOrderIds.has(m.order_id)) return;
     if(m.sender_id!==currentUser.id)
       result[m.order_id]=(result[m.order_id]||0)+1;
   });
@@ -1935,7 +1877,42 @@ async function openChat(orderId){
       {event:"INSERT",schema:"public",table:"messages",filter:`order_id=eq.${orderId}`},
       async payload=>{
         if(payload.new.sender_id!==currentUser.id){
-          await appendMessage(payload.new);
+          /*
+             Realtime fires as soon as the message row is inserted.
+             Image attachments are inserted immediately after that, so
+             fetch the complete message before rendering it. A short retry
+             window prevents an empty image bubble while uploads finish.
+          */
+          let fullMessage=null;
+          let messageError=null;
+
+          for(let attempt=0;attempt<80;attempt++){
+            const result=await sb.from("messages")
+              .select("id,order_id,sender_id,text,created_at,read_at,message_attachments(id,storage_path,mime_type)")
+              .eq("id",payload.new.id)
+              .single();
+
+            fullMessage=result.data;
+            messageError=result.error;
+
+            if(messageError || !fullMessage) break;
+            if((fullMessage.message_attachments||[]).length>0 || attempt>=79) break;
+
+            /*
+               The messages INSERT can reach Realtime before the attachment
+               INSERT. Keep the message pending long enough for the upload and
+               attachment row to finish instead of rendering an empty bubble.
+            */
+            await new Promise(resolve=>setTimeout(resolve,250));
+          }
+
+          if(fullMessage){
+            await appendMessage(fullMessage);
+          }else{
+            console.error("Realtime message load error:",messageError);
+            await appendMessage(payload.new);
+          }
+
           await markOrderRead(orderId);
         }
       })
@@ -1976,7 +1953,14 @@ async function loadMessages(orderId){
 async function appendMessage(message){
   const box=$("chatMessages");
   const isMe=message.sender_id===currentUser.id;
+  const attachments=message.message_attachments||[];
 
+  /*
+     Build the complete message first. This prevents an image-only message
+     from appearing as an empty bubble while Storage is still resolving.
+     Signed URLs are generated in one request and the browser is allowed to
+     decode every image before the bubble is inserted into the conversation.
+  */
   const row=document.createElement("div");
   row.className="message-row"+(isMe?" me":"");
 
@@ -1989,28 +1973,46 @@ async function appendMessage(message){
     bubble.appendChild(text);
   }
 
-  const attachments=message.message_attachments||[];
   if(attachments.length){
     const attBox=document.createElement("div");
     attBox.className="attachments";
 
-    for(const att of attachments){
-      const {data,error}=await sb.storage
-        .from(CHAT_BUCKET)
-        .createSignedUrl(att.storage_path,3600);
+    const paths=attachments.map(att=>att.storage_path);
+    const {data:signedData,error:signedError}=await sb.storage
+      .from(CHAT_BUCKET)
+      .createSignedUrls(paths,3600);
 
-      if(!error && data?.signedUrl){
+    if(!signedError && Array.isArray(signedData)){
+      const imageJobs=signedData.map((signed,index)=>new Promise(resolve=>{
+        if(!signed?.signedUrl){ resolve(); return; }
+
         const img=document.createElement("img");
-        img.src=data.signedUrl;
         img.alt="Chat image";
-        img.loading="lazy";
-        img.onclick=()=>window.open(data.signedUrl,"_blank","noopener");
-        attBox.appendChild(img);
+        img.loading="eager";
+        img.decoding="async";
+        img.src=signed.signedUrl;
+        img.onclick=()=>window.open(signed.signedUrl,"_blank","noopener");
+
+        const done=()=>resolve(img);
+        img.addEventListener("load",done,{once:true});
+        img.addEventListener("error",()=>resolve(null),{once:true});
+
+        /* Already cached images may complete before the listeners run. */
+        if(img.complete) resolve(img.naturalWidth>0?img:null);
+      }));
+
+      const loadedImages=await Promise.all(imageJobs);
+      for(const img of loadedImages){
+        if(img) attBox.appendChild(img);
       }
     }
 
-    bubble.appendChild(attBox);
+    if(attBox.children.length) bubble.appendChild(attBox);
   }
+
+  /* Do not create a completely empty bubble if neither text nor an image
+     could be rendered. */
+  if(!bubble.childNodes.length) return;
 
   const time=document.createElement("div");
   time.className="message-time";
