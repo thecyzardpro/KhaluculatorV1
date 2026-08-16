@@ -602,7 +602,13 @@ function getPasswordResetRedirect(){
 }
 
 function isPasswordRecovery(){
-  return /type=recovery/i.test(window.location.hash || "");
+  const hash=window.location.hash || "";
+  const search=window.location.search || "";
+  // Supabase may return recovery links using either the implicit-flow
+  // hash (type=recovery) or the PKCE query parameter (code=...).
+  return /(?:^|[&#?])type=recovery(?:&|$)/i.test(hash) ||
+    /(?:^|[&?])type=recovery(?:&|$)/i.test(search) ||
+    /(?:^|[&?])code=[^&]+/i.test(search);
 }
 
 function showResetPassword(){
@@ -623,6 +629,7 @@ let sb = null;
 let currentUser = null;
 let currentProfile = null;
 let afterLoginInProgress = false;
+let passwordRecoveryActive = false;
 
 let map = null;
 let marker = null;
@@ -740,6 +747,14 @@ function calcClick(k){
 
 /* ---------- Init / Auth ---------- */
 
+// Password-recovery links must bypass the calculator gate.
+// Normal visits still use the calculator gate exactly as before.
+if(isPasswordRecovery()){
+  $("unlock").classList.add("hidden");
+  $("store").style.display="block";
+  init();
+}
+
 async function init(){
   if(!window.supabase){
     toast("Supabase library failed to load.", true);
@@ -753,8 +768,34 @@ async function init(){
 
   sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
 
+  // A Supabase recovery email can arrive in two formats: the older implicit
+  // flow (tokens in the URL hash) or the PKCE flow (a ?code=... query).
+  // Exchange the PKCE code BEFORE getSession(), otherwise the recovery link
+  // can look like an ordinary visit and fall through to the calculator gate.
+  const recoveryLink=isPasswordRecovery();
+  if(recoveryLink){
+    const code=new URLSearchParams(window.location.search).get("code");
+    if(code){
+      const {error:codeError}=await sb.auth.exchangeCodeForSession(code);
+      if(codeError){
+        toast("This password recovery link is invalid or expired. Please request a new one.",true);
+        return;
+      }
+    }
+  }
+
   const {data:{session}}=await sb.auth.getSession();
-  if(isPasswordRecovery()){
+  if(recoveryLink){
+    if(!session?.user){
+      toast("Password recovery session could not be established. Please request a new reset email.",true);
+      return;
+    }
+    passwordRecoveryActive=true;
+    currentUser=session.user;
+    if(session.user.email){
+      $("loginEmail").value=session.user.email;
+      try{sessionStorage.setItem("reset_email",session.user.email);}catch(e){}
+    }
     showResetPassword();
   }else if(session?.user){
     currentUser=session.user;
@@ -762,8 +803,13 @@ async function init(){
   }
 
   sb.auth.onAuthStateChange(async (_event,session)=>{
-    if(_event === "PASSWORD_RECOVERY"){
-      currentUser=session?.user || null;
+    if(_event === "PASSWORD_RECOVERY" || passwordRecoveryActive || isPasswordRecovery()){
+      passwordRecoveryActive=true;
+      currentUser=session?.user || currentUser || null;
+      if(session?.user?.email){
+        $("loginEmail").value=session.user.email;
+        try{sessionStorage.setItem("reset_email",session.user.email);}catch(e){}
+      }
       showResetPassword();
       return;
     }
@@ -819,11 +865,20 @@ async function updatePassword(){
   $("resetPasswordBtn").disabled=false;
   $("resetPasswordBtn").textContent="Update password";
   if(error) return toast(error.message,true);
+  const resetEmail=currentUser?.email || sessionStorage.getItem("reset_email") || "";
   $("resetPass").value="";
   $("resetPassConfirm").value="";
-  showLoginAuth();
+  $("loginPass").value="";
+  if(resetEmail) $("loginEmail").value=resetEmail;
+  currentUser=null;
+  currentProfile=null;
+  passwordRecoveryActive=false;
   try{await sb.auth.signOut();}catch(e){}
-  toast("Password updated successfully. You can now log in.");
+  try{sessionStorage.removeItem("reset_email");}catch(e){}
+  const cleanUrl=window.location.pathname + window.location.search;
+  try{window.history.replaceState({},document.title,cleanUrl);}catch(e){}
+  showLoginAuth();
+  toast("Password updated successfully. Please log in again with your new password.");
 }
 
 
@@ -1255,37 +1310,21 @@ async function getUnreadCounts(orderIds){
   const result={};
   if(!orderIds?.length) return result;
 
-  /*
-   * Only PENDING orders can have active unread chat messages.
-   * Once an order is delivered/closed, its unread messages must
-   * never contribute to the admin/customer unread badge.
-   */
-  const {data:orders,error:ordersError}=await sb
-    .from("orders")
-    .select("id,status")
-    .in("id",orderIds)
-    .eq("status","pending");
-
-  if(ordersError) return result;
-
-  const activeOrderIds=(orders||[]).map(o=>o.id);
-  if(!activeOrderIds.length) return result;
-
   const {data,error}=await sb.from("messages")
     .select("order_id,sender_id,read_at")
-    .in("order_id",activeOrderIds)
+    .in("order_id",orderIds)
     .is("read_at",null);
 
   if(error) return result;
 
   (data||[]).forEach(m=>{
-    if(m.sender_id!==currentUser.id){
+    if(m.sender_id!==currentUser.id)
       result[m.order_id]=(result[m.order_id]||0)+1;
-    }
   });
 
   return result;
 }
+
 /*
  * ADMIN UNREAD STATE
  * Realtime is the primary path. A lightweight fallback refresh keeps badges
