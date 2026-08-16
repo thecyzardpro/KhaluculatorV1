@@ -259,7 +259,6 @@ th{color:#9bd49e}
 
 <body>
 
-<!-- Calculator gate retained from the original system -->
 <section id="unlock">
   <div class="card">
     <div class="center">
@@ -281,7 +280,6 @@ th{color:#9bd49e}
     <div id="userHeader" class="hidden" style="display:flex;align-items:center;gap:9px;margin-left:auto"><span id="userNameDisplay" class="green" style="font-weight:800"></span><button class="btn danger small" id="logoutBtn">Logout</button></div>
   </div>
 
-  <!-- AUTH -->
   <section id="authSection" class="auth">
     <div class="card">
       <div class="auth-tabs">
@@ -305,13 +303,24 @@ th{color:#9bd49e}
       <div id="resetPasswordForm" class="hidden">
         <h2 style="margin-bottom:10px">Reset your password</h2>
         <p class="muted" style="font-size:12px;line-height:1.5">Your recovery link is valid. Choose a new password below.</p>
+
         <label>New password</label>
         <input id="resetPass" type="password" autocomplete="new-password">
+
         <label>Confirm new password</label>
         <input id="resetPassConfirm" type="password" autocomplete="new-password">
-        <p class="muted" style="font-size:12px;margin-top:7px">Minimum 8 characters with uppercase, lowercase, number and symbol.</p>
-        <button class="btn" style="width:100%;margin-top:12px" id="resetPasswordBtn">Update password</button>
-        <button class="btn secondary" style="width:100%;margin-top:8px" id="backToLoginBtn">Back to login</button>
+
+        <p class="muted" style="font-size:12px;margin-top:7px">
+          Minimum 8 characters with uppercase, lowercase, number and symbol.
+        </p>
+
+        <button class="btn" style="width:100%;margin-top:12px" id="resetPasswordBtn">
+          Update password
+        </button>
+
+        <button class="btn secondary" style="width:100%;margin-top:8px" id="backToLoginBtn">
+          Back to login
+        </button>
       </div>
 
       <div id="registerForm" class="hidden">
@@ -330,7 +339,6 @@ th{color:#9bd49e}
     </div>
   </section>
 
-  <!-- CUSTOMER -->
   <section id="customerSection" class="hidden">
 
     <div class="statgrid">
@@ -381,7 +389,6 @@ th{color:#9bd49e}
 
   </section>
 
-  <!-- ADMIN -->
   <section id="adminSection" class="hidden">
 
     <div class="statgrid">
@@ -452,7 +459,6 @@ th{color:#9bd49e}
       </div>
     </div>
 
-  
     <div id="adminSessionsTab" class="hidden">
       <div class="card">
         <div style="display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap">
@@ -468,7 +474,6 @@ th{color:#9bd49e}
     </div>
 </section>
 
-
   <footer id="storeFooter" class="footer">
     <div class="footer-grid">
       <div><h3>WALAKAYA</h3><p>Secure digital commerce infrastructure powering Green Store.</p><p style="margin-top:9px">● Secure store environment</p></div>
@@ -481,7 +486,6 @@ th{color:#9bd49e}
 
 </main>
 
-<!-- DEPOSIT MODAL -->
 <div id="depositModal" class="chat hidden">
   <div class="card" style="width:min(470px,100%);margin:0">
     <div style="display:flex;justify-content:space-between;align-items:center;gap:10px"><div class="form-title"><div class="form-icon">💰</div><div><h2>Deposit Wallet</h2><div class="muted" style="font-size:11px">Create a payment verification request</div></div></div><button class="btn secondary small" id="closeDeposit">✕</button></div>
@@ -496,7 +500,6 @@ th{color:#9bd49e}
   </div>
 </div>
 
-<!-- ORDER / MAP MODAL -->
 <div id="orderModal" class="chat hidden">
   <div class="card" style="width:min(650px,100%);max-height:94vh;overflow:auto;margin:0">
     <div style="display:flex;justify-content:space-between;align-items:center">
@@ -548,7 +551,6 @@ th{color:#9bd49e}
   </div>
 </div>
 
-<!-- CHAT -->
 <div id="chatOverlay" class="chat hidden">
   <div class="chat-box">
     <div class="chat-head">
@@ -580,8 +582,6 @@ th{color:#9bd49e}
 <script>
 /* ============================================================
    CONFIGURATION
-   Replace these two values with the NEW Supabase project.
-   NEVER put service_role or RESEND API keys here.
    ============================================================ */
 
 const SUPABASE_URL = "https://gzcxheoeouwuoybyowvy.supabase.co";
@@ -591,36 +591,64 @@ const CHAT_BUCKET = "chat-images";
 const ACCESS_CODE = 0.7734;
 const MAX_CHAT_IMAGE_SIZE = 20 * 1024 * 1024;
 
+/* ============================================================
+   PASSWORD RESET
+   ============================================================ */
+
 function getPasswordResetRedirect(){
-  // file:// has no valid web origin for a recovery redirect; Supabase will use
-  // the configured Site URL / Redirect URL in that case.
-  if(location.protocol === "http:" || location.protocol === "https:")
+  if(location.protocol === "http:" || location.protocol === "https:"){
     return location.origin + location.pathname;
+  }
   return undefined;
 }
 
+/*
+ * Supabase recovery links can arrive in two forms:
+ *
+ * 1. Legacy / implicit flow:
+ *    #access_token=...&refresh_token=...&type=recovery
+ *
+ * 2. PKCE flow:
+ *    ?code=...
+ *
+ * Both must remain on the authentication/reset screen and must NEVER
+ * enter afterLogin().
+ */
 function isPasswordRecovery(){
-  return /type=recovery/i.test(window.location.hash || "");
+  const hash = window.location.hash || "";
+  const search = new URLSearchParams(window.location.search || "");
+
+  return /(?:^|&)type=recovery(?:&|$)/i.test(hash.replace(/^#/,"")) ||
+         /type=recovery/i.test(hash) ||
+         search.has("code");
 }
 
-function showResetPassword(){
+function showResetPassword(email=""){
   $("loginForm").classList.add("hidden");
   $("registerForm").classList.add("hidden");
   $("forgotPasswordBox").classList.add("hidden");
   $("resetPasswordForm").classList.remove("hidden");
+
+  if(email){
+    $("loginEmail").value=email;
+  }
+
+  $("resetPass").focus();
 }
 
 function showLoginAuth(){
   $("resetPasswordForm").classList.add("hidden");
   $("forgotPasswordBox").classList.remove("hidden");
   $("loginForm").classList.remove("hidden");
+  $("registerForm").classList.add("hidden");
 }
-
 
 let sb = null;
 let currentUser = null;
 let currentProfile = null;
 let afterLoginInProgress = false;
+let passwordRecoveryMode = false;
+let recoveryEmail = "";
 
 let map = null;
 let marker = null;
@@ -686,13 +714,13 @@ function passwordOK(pass){
 
 async function getProfile(){
   if(!currentUser) return null;
-  const {data,error} = await sb
+  const {data,error}=await sb
     .from("profiles")
     .select("id,full_name,email,is_admin")
     .eq("id",currentUser.id)
     .single();
   if(error) throw error;
-  currentProfile = data;
+  currentProfile=data;
   return data;
 }
 
@@ -749,50 +777,119 @@ async function init(){
     return;
   }
 
-  sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
-
-  const {data:{session}}=await sb.auth.getSession();
+  /*
+   * PKCE is explicitly enabled so password recovery links containing
+   * ?code=... are handled correctly by Supabase Auth.
+   */
+  sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY,{
+    auth:{
+      flowType:"pkce",
+      detectSessionInUrl:true,
+      persistSession:true,
+      autoRefreshToken:true
+    }
+  });
 
   /*
-     PASSWORD RECOVERY MUST ALWAYS STOP AT THE RESET FORM.
-     Supabase creates a temporary authenticated recovery session from the
-     email link. That session is intentionally NOT passed to afterLogin(),
-     otherwise the recovery link would open the normal dashboard directly.
-  */
-  const recovery=isPasswordRecovery();
-  if(recovery){
-    currentUser=session?.user || null;
-    showResetPassword();
-  }else if(session?.user){
-    currentUser=session.user;
-    await afterLogin();
-  }
-
+   * IMPORTANT:
+   * Register the auth listener BEFORE getSession().
+   *
+   * This guarantees that PASSWORD_RECOVERY cannot be missed while the
+   * recovery session is being created from the email link.
+   */
   sb.auth.onAuthStateChange(async (_event,session)=>{
+
     if(_event === "PASSWORD_RECOVERY"){
+      passwordRecoveryMode=true;
       currentUser=session?.user || null;
-      showResetPassword();
+      recoveryEmail=session?.user?.email || recoveryEmail || "";
+
+      /*
+       * NEVER call afterLogin() for PASSWORD_RECOVERY.
+       * The recovery session exists only so updateUser({password}) can work.
+       */
+      showResetPassword(recoveryEmail);
       return;
     }
-    if(recovery)return;
+
+    /*
+     * If we are already handling a recovery link, normal SIGNED_IN events
+     * generated by the recovery session must NOT open the dashboard.
+     */
+    if(passwordRecoveryMode){
+      if(session?.user){
+        currentUser=session.user;
+        recoveryEmail=session.user.email || recoveryEmail || "";
+        showResetPassword(recoveryEmail);
+      }
+      return;
+    }
+
+    if(_event === "SIGNED_OUT"){
+      currentUser=null;
+      currentProfile=null;
+      return;
+    }
+
     if(session?.user && !currentUser){
       currentUser=session.user;
       await afterLogin();
     }
   });
+
+  /*
+   * Let Supabase consume ?code=... / recovery URL before checking session.
+   * A short microtask delay also gives the auth URL handler a chance to
+   * establish the temporary recovery session.
+   */
+  const recovery=isPasswordRecovery();
+
+  if(recovery){
+    passwordRecoveryMode=true;
+
+    const {data:{session}}=await sb.auth.getSession();
+
+    if(session?.user){
+      currentUser=session.user;
+      recoveryEmail=session.user.email || "";
+      showResetPassword(recoveryEmail);
+    }else{
+      /*
+       * If the PKCE code has not finished exchanging yet, remain on the
+       * reset screen. The PASSWORD_RECOVERY/SIGNED_IN auth event will
+       * populate currentUser when Supabase completes the exchange.
+       */
+      showResetPassword(recoveryEmail);
+    }
+
+    return;
+  }
+
+  const {data:{session}}=await sb.auth.getSession();
+
+  if(session?.user){
+    currentUser=session.user;
+    await afterLogin();
+  }
 }
 
 $("showLogin").onclick=()=>{
+  passwordRecoveryMode=false;
   $("loginForm").classList.remove("hidden");
   $("registerForm").classList.add("hidden");
+  $("resetPasswordForm").classList.add("hidden");
+  $("forgotPasswordBox").classList.remove("hidden");
   $("showLogin").classList.remove("secondary");
   $("showLogin").classList.add("btn");
   $("showRegister").classList.add("secondary");
 };
 
 $("showRegister").onclick=()=>{
+  passwordRecoveryMode=false;
   $("registerForm").classList.remove("hidden");
   $("loginForm").classList.add("hidden");
+  $("resetPasswordForm").classList.add("hidden");
+  $("forgotPasswordBox").classList.remove("hidden");
   $("showRegister").classList.remove("secondary");
   $("showRegister").classList.add("btn");
   $("showLogin").classList.add("secondary");
@@ -802,55 +899,171 @@ $("loginBtn").onclick=login;
 $("registerBtn").onclick=register;
 $("forgotPasswordBtn").onclick=sendPasswordReset;
 $("resetPasswordBtn").onclick=updatePassword;
-$("backToLoginBtn").onclick=showLoginAuth;
+$("backToLoginBtn").onclick=async()=>{
+  passwordRecoveryMode=false;
+  currentUser=null;
+  recoveryEmail="";
+  try{await sb.auth.signOut();}catch(e){}
+  if(window.history?.replaceState){
+    window.history.replaceState(
+      {},
+      document.title,
+      window.location.pathname+window.location.search
+    );
+  }
+  showLoginAuth();
+};
 
 async function sendPasswordReset(){
   const email=$("loginEmail").value.trim();
-  if(!email) return toast("Enter your account email first.",true);
+
+  if(!email)
+    return toast("Enter your account email first.",true);
+
   $("forgotPasswordBtn").disabled=true;
+  $("forgotPasswordBtn").textContent="Sending...";
+
   const redirectTo=getPasswordResetRedirect();
   const options=redirectTo ? {redirectTo} : undefined;
+
   const {error}=await sb.auth.resetPasswordForEmail(email,options);
+
   $("forgotPasswordBtn").disabled=false;
-  if(error) return toast(error.message,true);
+  $("forgotPasswordBtn").textContent="Forgot password?";
+
+  if(error)
+    return toast(error.message,true);
+
   toast("Password reset email sent. Open the link from your email to choose a new password.");
 }
 
+/*
+ * PASSWORD UPDATE
+ *
+ * This runs ONLY from the recovery screen.
+ *
+ * Supabase's recovery session authorizes updateUser({password}).
+ * After success we explicitly sign out so the user is returned to Login
+ * and must authenticate using the NEW password.
+ */
 async function updatePassword(){
   const pass=$("resetPass").value;
   const confirmPass=$("resetPassConfirm").value;
-  if(!passwordOK(pass)) return toast("Password: 8+ chars, uppercase, lowercase, number and symbol.",true);
-  if(pass!==confirmPass) return toast("Passwords do not match.",true);
+
+  if(!passwordOK(pass)){
+    return toast(
+      "Password: 8+ chars, uppercase, lowercase, number and symbol.",
+      true
+    );
+  }
+
+  if(pass!==confirmPass){
+    return toast("Passwords do not match.",true);
+  }
+
+  if(!sb){
+    return toast("Authentication is not ready. Please reopen the reset link.",true);
+  }
+
+  /*
+   * Make sure we have a recovery-authenticated user.
+   * Do not attempt a normal login here.
+   */
+  let sessionUser=currentUser;
+
+  if(!sessionUser){
+    const {data,error}=await sb.auth.getSession();
+
+    if(error){
+      return toast(error.message,true);
+    }
+
+    sessionUser=data?.session?.user || null;
+    currentUser=sessionUser;
+  }
+
+  if(!sessionUser){
+    return toast(
+      "This password reset link is no longer valid. Request a new reset email.",
+      true
+    );
+  }
+
+  const loginEmail=sessionUser.email || recoveryEmail || $("loginEmail").value.trim();
+
   $("resetPasswordBtn").disabled=true;
   $("resetPasswordBtn").textContent="Updating...";
-  const {error}=await sb.auth.updateUser({password:pass});
-  $("resetPasswordBtn").disabled=false;
-  $("resetPasswordBtn").textContent="Update password";
-  if(error) return toast(error.message,true);
+
+  const {error}=await sb.auth.updateUser({
+    password:pass
+  });
+
+  if(error){
+    $("resetPasswordBtn").disabled=false;
+    $("resetPasswordBtn").textContent="Update password";
+    return toast(error.message,true);
+  }
+
+  /*
+   * Password has now been updated in Supabase Auth.
+   * Clear the recovery session so the dashboard is NEVER opened directly.
+   */
   $("resetPass").value="";
   $("resetPassConfirm").value="";
-  try{await sb.auth.signOut();}catch(e){}
-  if(window.history?.replaceState)
-    window.history.replaceState({},document.title,window.location.pathname+window.location.search);
-  showLoginAuth();
-  $("loginEmail").value=currentUser?.email || $("loginEmail").value;
-  $("loginPass").value="";
-  currentUser=null;
-  toast("Password updated successfully. You can now log in with your new password.");
-}
 
+  try{
+    await sb.auth.signOut();
+  }catch(e){
+    console.warn("Recovery signout:",e.message);
+  }
+
+  currentUser=null;
+  currentProfile=null;
+  passwordRecoveryMode=false;
+  recoveryEmail="";
+
+  /*
+   * Remove recovery query/hash from browser URL.
+   * The user remains on the same index/login page.
+   */
+  if(window.history?.replaceState){
+    window.history.replaceState(
+      {},
+      document.title,
+      window.location.pathname+window.location.search
+    );
+  }
+
+  $("resetPasswordBtn").disabled=false;
+  $("resetPasswordBtn").textContent="Update password";
+
+  showLoginAuth();
+
+  /*
+   * Keep the account email so the user only needs to enter the NEW password.
+   */
+  $("loginEmail").value=loginEmail;
+  $("loginPass").value="";
+  $("loginPass").focus();
+
+  toast("Password updated successfully. Log in with your new password.");
+}
 
 async function login(){
   const email=$("loginEmail").value.trim();
   const password=$("loginPass").value;
 
-  if(!email || !password) return toast("Enter email and password.",true);
+  if(!email || !password)
+    return toast("Enter email and password.",true);
 
   const {data,error}=await sb.auth.signInWithPassword({email,password});
+
   if(error){
     if(error.message.toLowerCase().includes("confirmed")){
       toast("Verify your email first. Check your inbox.",true);
-    }else toast(error.message,true);
+    }else{
+      toast(error.message,true);
+    }
     return;
   }
 
@@ -883,7 +1096,19 @@ async function register(){
 
 async function afterLogin(){
   if(afterLoginInProgress)return;
+
+  /*
+   * Absolute protection:
+   * even if an Auth event reaches here unexpectedly while recovering,
+   * never open the dashboard.
+   */
+  if(passwordRecoveryMode || isPasswordRecovery()){
+    showResetPassword(currentUser?.email || recoveryEmail || "");
+    return;
+  }
+
   afterLoginInProgress=true;
+
   try{
     await getProfile();
 
@@ -900,7 +1125,9 @@ async function afterLogin(){
       $("adminSection").classList.add("hidden");
       await initCustomer();
     }
+
     await setupSessionMonitor();
+
   }catch(error){
     console.error(error);
     toast("Could not load account profile: "+error.message,true);
@@ -911,16 +1138,22 @@ async function afterLogin(){
 
 $("logoutBtn").onclick=async()=>{
   try{
-    if(currentSessionId && sb) await sb.rpc("logout_login_session",{p_session_id:currentSessionId});
-  }catch(e){console.warn("Session logout:",e.message);}
+    if(currentSessionId && sb)
+      await sb.rpc("logout_login_session",{p_session_id:currentSessionId});
+  }catch(e){
+    console.warn("Session logout:",e.message);
+  }
+
   if(activeChatChannel) await sb.removeChannel(activeChatChannel);
   if(adminOrdersChannel) await sb.removeChannel(adminOrdersChannel);
   if(userOrdersChannel) await sb.removeChannel(userOrdersChannel);
   if(sessionChannel) await sb.removeChannel(sessionChannel);
+
   clearInterval(window.__sessionHeartbeat);
   stopAdminUnreadFallback();
   stopAdminLiveRefresh();
   clearStoredLoginSession();
+
   await sb.auth.signOut();
   location.reload();
 };
@@ -1010,6 +1243,7 @@ async function openOrderModal(productId){
 
       map.on("click",e=>setMapPoint(e.latlng.lat,e.latlng.lng));
     }
+
     map.invalidateSize();
   },100);
 }
@@ -1018,8 +1252,10 @@ function setMapPoint(lat,lng){
   selectedLat=Number(lat);
   selectedLng=Number(lng);
 
-  if(marker) marker.setLatLng([selectedLat,selectedLng]);
-  else marker=L.marker([selectedLat,selectedLng]).addTo(map);
+  if(marker)
+    marker.setLatLng([selectedLat,selectedLng]);
+  else
+    marker=L.marker([selectedLat,selectedLng]).addTo(map);
 
   $("coordsText").textContent=
     `Selected: ${selectedLat.toFixed(6)}, ${selectedLng.toFixed(6)}`;
@@ -1030,6 +1266,7 @@ $("locateMeBtn").onclick=()=>{
     return toast("Your browser does not support location.",true);
 
   toast("Getting your current location...");
+
   navigator.geolocation.getCurrentPosition(
     pos=>{
       const {latitude,longitude}=pos.coords;
@@ -1044,10 +1281,12 @@ $("locateMeBtn").onclick=()=>{
 $("clearLocationBtn").onclick=()=>{
   selectedLat=null;
   selectedLng=null;
+
   if(marker){
     map.removeLayer(marker);
     marker=null;
   }
+
   $("coordsText").textContent="No location selected.";
 };
 
@@ -1055,8 +1294,10 @@ $("closeOrder").onclick=()=>$("orderModal").classList.add("hidden");
 
 function updatePaymentMethodUI(){
   selectedPaymentMethod=document.querySelector('input[name="orderPaymentMethod"]:checked')?.value || "wallet";
+
   const note=$("paymentMethodNote");
   const button=$("confirmOrderBtn");
+
   if(selectedPaymentMethod==="in_hand"){
     note.textContent="🤝 Pay in Hand selected · wallet will not be charged";
     button.textContent="Place Order · Pay in Hand";
@@ -1071,9 +1312,10 @@ $("paymentInHand").onchange=updatePaymentMethodUI;
 updatePaymentMethodUI();
 
 $("confirmOrderBtn").onclick=async()=>{
-  if(!selectedProduct) return;
+  if(!selectedProduct)return;
 
   const address=$("deliveryAddress").value.trim();
+
   if(!address && (selectedLat===null || selectedLng===null))
     return toast("Add a delivery address or select a map location.",true);
 
@@ -1102,7 +1344,12 @@ $("confirmOrderBtn").onclick=async()=>{
 
   $("orderModal").classList.add("hidden");
   toast("Order placed successfully.");
-  await Promise.all([loadWallet(),loadMyOrders(),loadMyTransactions()]);
+
+  await Promise.all([
+    loadWallet(),
+    loadMyOrders(),
+    loadMyTransactions()
+  ]);
 };
 
 async function loadMyOrders(){
@@ -1136,6 +1383,7 @@ async function loadMyOrders(){
 
   list.innerHTML=data.map(o=>{
     const unread=unreadMap[o.id]||0;
+
     const location=o.delivery_lat!=null
       ? `<a class="green" target="_blank" rel="noopener" href="${mapLink(o.delivery_lat,o.delivery_lng)}">📍 View map</a>`
       : "";
@@ -1149,9 +1397,17 @@ async function loadMyOrders(){
           </div>
           <span class="status ${esc(o.status)}">${esc(o.status)}</span>
         </div>
+
         <div style="margin-top:9px">${money(o.price_tzs)}</div>
-        <div class="payment-badge">${o.payment_method==="in_hand" ? "🤝 PAY IN HAND" : "💳 WALLET"}</div>
-        <div class="muted" style="margin-top:7px">📍 ${esc(o.delivery_address||"No text address")}</div>
+
+        <div class="payment-badge">
+          ${o.payment_method==="in_hand" ? "🤝 PAY IN HAND" : "💳 WALLET"}
+        </div>
+
+        <div class="muted" style="margin-top:7px">
+          📍 ${esc(o.delivery_address||"No text address")}
+        </div>
+
         <div style="margin-top:8px">${location}</div>
 
         ${o.status==="pending" ? `
@@ -1165,11 +1421,13 @@ async function loadMyOrders(){
     `;
   }).join("");
 
-  $("userUnreadTotal").textContent=Object.values(unreadMap).reduce((a,b)=>a+b,0);
+  $("userUnreadTotal").textContent=
+    Object.values(unreadMap).reduce((a,b)=>a+b,0);
 }
 
 async function loadMyTransactions(){
   const list=$("myTransactionsList");
+
   const {data,error}=await sb.from("wallet_transactions")
     .select("id,type,amount_tzs,status,reference,description,created_at")
     .eq("user_id",currentUser.id)
@@ -1188,14 +1446,18 @@ async function loadMyTransactions(){
 
   list.innerHTML=data.map(t=>{
     const positive=["deposit","refund","adjustment"].includes(t.type);
+
     return `
       <div class="order" style="display:flex;justify-content:space-between;gap:10px">
         <div>
           <strong>${esc(t.type)}</strong>
           <div class="muted" style="font-size:11px">${fmtDate(t.created_at)}</div>
         </div>
+
         <div style="text-align:right">
-          <strong class="${positive?"green":"red"}">${positive?"+":"-"}${money(t.amount_tzs)}</strong>
+          <strong class="${positive?"green":"red"}">
+            ${positive?"+":"-"}${money(t.amount_tzs)}
+          </strong>
           <div class="muted" style="font-size:11px">${esc(t.status)}</div>
         </div>
       </div>
@@ -1210,7 +1472,10 @@ $("depositBtn").onclick=()=>{
   $("depositReference").value="";
   $("depositModal").classList.remove("hidden");
 };
+
 $("closeDeposit").onclick=()=>$("depositModal").classList.add("hidden");
+
+$("cancelDepositBtn").onclick=()=>$("depositModal").classList.add("hidden");
 
 $("createDepositBtn").onclick=async()=>{
   const amount=Number($("depositAmount").value);
@@ -1219,6 +1484,7 @@ $("createDepositBtn").onclick=async()=>{
 
   if(!Number.isInteger(amount) || amount<=0)
     return toast("Enter a valid whole TSH amount.",true);
+
   if(amount<100)
     return toast("Minimum deposit is TSH 100.",true);
 
@@ -1247,22 +1513,49 @@ $("createDepositBtn").onclick=async()=>{
 /* ---------- Realtime customer ---------- */
 
 function setupUserRealtime(){
-  if(userOrdersChannel) sb.removeChannel(userOrdersChannel);
+  if(userOrdersChannel)
+    sb.removeChannel(userOrdersChannel);
+
   userOrdersChannel=sb.channel(`user_system_${currentUser.id}`)
-    .on("postgres_changes",{event:"*",schema:"public",table:"orders",filter:`user_id=eq.${currentUser.id}`},
-      async()=>await loadMyOrders())
-    .on("postgres_changes",{event:"*",schema:"public",table:"wallet_transactions",filter:`user_id=eq.${currentUser.id}`},
-      async()=>await Promise.all([loadWallet(),loadMyTransactions()]))
-    .on("postgres_changes",{event:"INSERT",schema:"public",table:"messages"},
+    .on(
+      "postgres_changes",
+      {
+        event:"*",
+        schema:"public",
+        table:"orders",
+        filter:`user_id=eq.${currentUser.id}`
+      },
+      async()=>await loadMyOrders()
+    )
+    .on(
+      "postgres_changes",
+      {
+        event:"*",
+        schema:"public",
+        table:"wallet_transactions",
+        filter:`user_id=eq.${currentUser.id}`
+      },
+      async()=>await Promise.all([
+        loadWallet(),
+        loadMyTransactions()
+      ])
+    )
+    .on(
+      "postgres_changes",
+      {
+        event:"INSERT",
+        schema:"public",
+        table:"messages"
+      },
       async payload=>{
         if(activeOrderId===payload.new.order_id){
-          /* The dedicated open-chat channel renders the message immediately.
-             Do not create a second badge/count while that chat is open. */
           return;
         }
+
         await loadMyOrders();
         toast("New chat message received.");
-      })
+      }
+    )
     .subscribe();
 }
 
@@ -1270,31 +1563,27 @@ function setupUserRealtime(){
 
 async function getUnreadCounts(orderIds){
   const result={};
-  if(!orderIds?.length) return result;
 
-  /*
-   * UNREAD IS ONLY VALID FOR OPEN/PENDING ORDERS.
-   * Once an order is closed (delivered/cancelled/etc.), its old unread
-   * messages must no longer contribute to any badge or unread total.
-   */
+  if(!orderIds?.length)return result;
+
   const {data:orders,error:ordersError}=await sb.from("orders")
     .select("id,status")
     .in("id",orderIds);
 
-  if(ordersError) return result;
+  if(ordersError)return result;
 
   const pendingOrderIds=(orders||[])
     .filter(o=>o.status==="pending")
     .map(o=>o.id);
 
-  if(!pendingOrderIds.length) return result;
+  if(!pendingOrderIds.length)return result;
 
   const {data,error}=await sb.from("messages")
     .select("order_id,sender_id,read_at")
     .in("order_id",pendingOrderIds)
     .is("read_at",null);
 
-  if(error) return result;
+  if(error)return result;
 
   (data||[]).forEach(m=>{
     if(m.sender_id!==currentUser.id)
@@ -1304,22 +1593,19 @@ async function getUnreadCounts(orderIds){
   return result;
 }
 
-/*
- * ADMIN UNREAD STATE
- * Realtime is the primary path. A lightweight fallback refresh keeps badges
- * correct even if a browser misses a realtime INSERT while reconnecting.
- */
 async function refreshAdminUnreadState(renderOrders=false){
-  if(!currentProfile?.is_admin || !sb || !currentUser || adminUnreadRefreshBusy) return;
+  if(!currentProfile?.is_admin || !sb || !currentUser || adminUnreadRefreshBusy)
+    return;
 
   adminUnreadRefreshBusy=true;
+
   try{
     const {data:orders,error}=await sb
       .from("orders")
       .select("id,status")
       .eq("status","pending");
 
-    if(error) throw error;
+    if(error)throw error;
 
     const orderIds=(orders||[]).map(o=>o.id);
     const unreadMap=await getUnreadCounts(orderIds);
@@ -1332,11 +1618,13 @@ async function refreshAdminUnreadState(renderOrders=false){
       const unread=unreadMap[orderId]||0;
 
       const badge=card.querySelector(".admin-new-message-badge");
+
       if(unread){
         if(badge){
           badge.textContent=`🔴 NEW MESSAGE · ${unread}`;
         }else{
           const head=card.querySelector(".order-head");
+
           if(head){
             const b=document.createElement("span");
             b.className="admin-new-message-badge";
@@ -1349,14 +1637,17 @@ async function refreshAdminUnreadState(renderOrders=false){
       }
 
       const chatBtn=card.querySelector("[data-admin-chat-button]");
+
       if(chatBtn){
-        chatBtn.innerHTML=`💬 Chat${unread ? ` <span class="badge">${unread}</span>` : ""}`;
+        chatBtn.innerHTML=
+          `💬 Chat${unread ? ` <span class="badge">${unread}</span>` : ""}`;
       }
     });
 
     if(renderOrders && adminOrderFilter==="pending"){
       await loadAdminOrders("pending");
     }
+
   }catch(e){
     console.warn("Admin unread refresh:",e.message);
   }finally{
@@ -1366,8 +1657,10 @@ async function refreshAdminUnreadState(renderOrders=false){
 
 function startAdminUnreadFallback(){
   clearInterval(adminUnreadRefreshTimer);
+
   adminUnreadRefreshTimer=setInterval(()=>{
-    if(document.visibilityState==="visible") refreshAdminUnreadState(false);
+    if(document.visibilityState==="visible")
+      refreshAdminUnreadState(false);
   },3000);
 }
 
@@ -1376,20 +1669,12 @@ function stopAdminUnreadFallback(){
   adminUnreadRefreshTimer=null;
 }
 
-/*
- * ADMIN LIVE DATA REFRESH
- *
- * Realtime remains the primary path through setupAdminRealtime().
- * This independent lightweight refresh is intentionally kept at the admin
- * dashboard level instead of depending on the currently selected tab.
- * That means orders/users/badges stay current even while the admin is on
- * Sessions, Transactions, Withdraw, or another admin tab.
- * No SQL/schema change is required.
- */
 async function refreshAdminLiveData(){
-  if(!currentProfile?.is_admin || !sb || !currentUser || adminLiveRefreshBusy) return;
+  if(!currentProfile?.is_admin || !sb || !currentUser || adminLiveRefreshBusy)
+    return;
 
   adminLiveRefreshBusy=true;
+
   try{
     await Promise.all([
       loadAdminStats(),
@@ -1406,6 +1691,7 @@ async function refreshAdminLiveData(){
 
 function startAdminLiveRefresh(){
   clearInterval(adminLiveRefreshTimer);
+
   adminLiveRefreshTimer=setInterval(()=>{
     if(document.visibilityState==="visible" && currentProfile?.is_admin){
       refreshAdminLiveData();
@@ -1429,6 +1715,7 @@ async function initAdmin(){
     loadAdminTransactions(),
     loadWithdrawals()
   ]);
+
   await setupAdminRealtime();
   startAdminUnreadFallback();
   startAdminLiveRefresh();
@@ -1443,26 +1730,36 @@ async function loadAdminStats(){
   ]=await Promise.all([
     sb.from("profiles").select("id",{count:"exact",head:true}),
     sb.from("orders").select("id,status"),
-    sb.from("wallet_transactions").select("type,amount_tzs,status").eq("status","completed")
+    sb.from("wallet_transactions")
+      .select("type,amount_tzs,status")
+      .eq("status","completed")
   ]);
 
-  if(userError) console.error("Users count error:",userError);
-  if(ordersError) console.error("Orders stats error:",ordersError);
-  if(txError) console.error("Transactions stats error:",txError);
+  if(userError)console.error("Users count error:",userError);
+  if(ordersError)console.error("Orders stats error:",ordersError);
+  if(txError)console.error("Transactions stats error:",txError);
 
   $("totalUsers").textContent=Number(userCount||0);
-  $("pendingOrders").textContent=(orders||[]).filter(o=>o.status==="pending").length;
+  $("pendingOrders").textContent=
+    (orders||[]).filter(o=>o.status==="pending").length;
 
   let platform=0;
+
   (tx||[]).forEach(t=>{
-    if(["deposit","refund","adjustment"].includes(t.type)) platform+=Number(t.amount_tzs||0);
-    if(["purchase","withdrawal"].includes(t.type)) platform-=Number(t.amount_tzs||0);
+    if(["deposit","refund","adjustment"].includes(t.type))
+      platform+=Number(t.amount_tzs||0);
+
+    if(["purchase","withdrawal"].includes(t.type))
+      platform-=Number(t.amount_tzs||0);
   });
+
   $("platformBalance").textContent=money(platform);
 
   const orderIds=(orders||[]).map(o=>o.id);
   const unread=await getUnreadCounts(orderIds);
-  $("adminUnreadTotal").textContent=Object.values(unread).reduce((a,b)=>a+b,0);
+
+  $("adminUnreadTotal").textContent=
+    Object.values(unread).reduce((a,b)=>a+b,0);
 }
 
 async function loadAdminOrders(status){
@@ -1495,6 +1792,7 @@ async function loadAdminOrders(status){
 
   list.innerHTML=data.map(o=>{
     const unread=unreadMap[o.id]||0;
+
     const mapBtn=o.delivery_lat!=null
       ? `<a class="btn secondary small" target="_blank" rel="noopener" href="${mapLink(o.delivery_lat,o.delivery_lng)}">📍 Map</a>`
       : "";
@@ -1507,26 +1805,38 @@ async function loadAdminOrders(status){
             <div style="margin-top:4px">👤 ${esc(o.profiles?.full_name||"Unknown")}</div>
             <div class="muted" style="font-size:11px">${esc(o.profiles?.email||"")}</div>
           </div>
+
           <div style="text-align:right">
             <div class="green">${money(o.price_tzs)}</div>
-            <div class="payment-badge">${o.payment_method==="in_hand" ? "🤝 PAY IN HAND" : "💳 WALLET"}</div>
+            <div class="payment-badge">
+              ${o.payment_method==="in_hand" ? "🤝 PAY IN HAND" : "💳 WALLET"}
+            </div>
             <span class="status ${esc(o.status)}">${esc(o.status)}</span>
           </div>
         </div>
 
         ${unread ? `<div class="admin-new-message-badge">🔴 NEW MESSAGE · ${unread}</div>` : ""}
-        <div class="muted" style="margin-top:8px">📍 ${esc(o.delivery_address||"No text address")}</div>
+
+        <div class="muted" style="margin-top:8px">
+          📍 ${esc(o.delivery_address||"No text address")}
+        </div>
 
         <div style="display:flex;gap:7px;flex-wrap:wrap;margin-top:10px">
+
           ${status==="pending" ? `
             <button class="btn small" data-admin-chat-button onclick="openChat('${o.id}')">
               💬 Chat ${unread ? `<span class="badge">${unread}</span>` : ""}
             </button>
           ` : ""}
+
           ${mapBtn}
+
           ${status==="pending" ? `
-            <button class="btn blue small" onclick="deliverOrder('${o.id}')">Verify & Deliver</button>
+            <button class="btn blue small" onclick="deliverOrder('${o.id}')">
+              Verify & Deliver
+            </button>
           ` : ""}
+
         </div>
       </div>
     `;
@@ -1537,18 +1847,27 @@ $("pendingFilter").onclick=()=>loadAdminOrders("pending");
 $("deliveredFilter").onclick=()=>loadAdminOrders("delivered");
 
 async function deliverOrder(orderId){
-  if(!confirm("Mark this order as delivered?")) return;
+  if(!confirm("Mark this order as delivered?"))return;
 
   const {error}=await sb.rpc("mark_order_delivered",{p_order_id:orderId});
-  if(error) return toast(error.message,true);
 
-  if(activeOrderId===orderId) closeChat();
+  if(error)
+    return toast(error.message,true);
+
+  if(activeOrderId===orderId)
+    closeChat();
+
   toast("Order delivered and conversation closed.");
-  await Promise.all([loadAdminOrders(adminOrderFilter),loadAdminStats()]);
+
+  await Promise.all([
+    loadAdminOrders(adminOrderFilter),
+    loadAdminStats()
+  ]);
 }
 
 async function loadAdminUsers(){
   const list=$("adminUsersList");
+
   const {data,error}=await sb.from("profiles")
     .select("id,full_name,email,is_admin,created_at,wallets(balance_tzs)")
     .order("created_at",{ascending:false})
@@ -1564,9 +1883,14 @@ async function loadAdminUsers(){
       <table>
         <thead>
           <tr>
-            <th>Name</th><th>Email</th><th>Balance</th><th>Role</th><th>Joined</th>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Balance</th>
+            <th>Role</th>
+            <th>Joined</th>
           </tr>
         </thead>
+
         <tbody>
           ${(data||[]).map(u=>`
             <tr>
@@ -1585,6 +1909,7 @@ async function loadAdminUsers(){
 
 async function loadAdminTransactions(){
   const list=$("adminTransactionsList");
+
   const {data,error}=await sb.from("wallet_transactions")
     .select("id,user_id,type,amount_tzs,status,reference,description,created_at,profiles(full_name,email)")
     .order("created_at",{ascending:false})
@@ -1598,9 +1923,17 @@ async function loadAdminTransactions(){
   list.innerHTML=`
     <div class="table-wrap">
       <table>
-        <thead><tr>
-          <th>Date</th><th>User</th><th>Type</th><th>Amount</th><th>Status</th><th>Reference</th>
-        </tr></thead>
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>User</th>
+            <th>Type</th>
+            <th>Amount</th>
+            <th>Status</th>
+            <th>Reference</th>
+          </tr>
+        </thead>
+
         <tbody>
           ${(data||[]).map(t=>`
             <tr>
@@ -1622,13 +1955,14 @@ async function setupAdminRealtime(){
   if(!sb||!currentUser||!currentProfile?.is_admin)return;
 
   if(adminOrdersChannel){
-    try{await sb.removeChannel(adminOrdersChannel);}catch(e){}
+    try{
+      await sb.removeChannel(adminOrdersChannel);
+    }catch(e){}
     adminOrdersChannel=null;
   }
 
   adminOrdersChannel=sb.channel(`admin_realtime_${currentUser.id}`);
 
-  /* ---------- ORDERS: new order + status/update ---------- */
   adminOrdersChannel.on(
     "postgres_changes",
     {event:"*",schema:"public",table:"orders"},
@@ -1642,13 +1976,13 @@ async function setupAdminRealtime(){
 
         if(payload?.eventType==="INSERT")
           toast("🛒 New order received.");
+
       }catch(e){
         console.warn("Admin orders realtime:",e.message);
       }
     }
   );
 
-  /* ---------- MESSAGES: unread badge/count ---------- */
   adminOrdersChannel.on(
     "postgres_changes",
     {event:"INSERT",schema:"public",table:"messages"},
@@ -1657,60 +1991,59 @@ async function setupAdminRealtime(){
         const orderId=payload?.new?.order_id;
         if(!orderId)return;
 
-        /* The open chat channel already renders the message itself. */
         if(activeOrderId===orderId){
-          /* The dedicated open-chat channel renders the message immediately
-             and markOrderRead() clears its unread state. Never show a badge
-             while the admin is actively viewing this conversation. */
           await refreshAdminUnreadState(false);
           return;
         }
 
         await refreshAdminUnreadState(false);
 
-        /* Re-render pending cards so a newly received message gets its
-           badge immediately, even when the admin is on another admin tab. */
         if(adminOrderFilter==="pending")
           await loadAdminOrders("pending");
 
         await loadAdminStats();
         toast("🔴 New customer message.");
+
       }catch(e){
         console.warn("Admin messages realtime:",e.message);
       }
     }
   );
 
-  /* ---------- WALLET TRANSACTIONS ---------- */
   adminOrdersChannel.on(
     "postgres_changes",
     {event:"*",schema:"public",table:"wallet_transactions"},
     async()=>{
       try{
-        await Promise.all([loadAdminStats(),loadAdminTransactions()]);
+        await Promise.all([
+          loadAdminStats(),
+          loadAdminTransactions()
+        ]);
       }catch(e){
         console.warn("Admin transactions realtime:",e.message);
       }
     }
   );
 
-  /* ---------- PROFILES: new registration + user count/list ---------- */
   adminOrdersChannel.on(
     "postgres_changes",
     {event:"*",schema:"public",table:"profiles"},
     async payload=>{
       try{
-        await Promise.all([loadAdminStats(),loadAdminUsers()]);
+        await Promise.all([
+          loadAdminStats(),
+          loadAdminUsers()
+        ]);
 
         if(payload?.eventType==="INSERT")
           toast("👤 New user registered.");
+
       }catch(e){
         console.warn("Admin profiles realtime:",e.message);
       }
     }
   );
 
-  /* ---------- WITHDRAWALS ---------- */
   adminOrdersChannel.on(
     "postgres_changes",
     {event:"*",schema:"public",table:"withdrawals"},
@@ -1727,17 +2060,18 @@ async function setupAdminRealtime(){
     }
   );
 
-  /* ---------- PRODUCTS ---------- */
   adminOrdersChannel.on(
     "postgres_changes",
     {event:"*",schema:"public",table:"products"},
     async()=>{
-      try{await loadProducts();}
-      catch(e){console.warn("Admin products realtime:",e.message);}
+      try{
+        await loadProducts();
+      }catch(e){
+        console.warn("Admin products realtime:",e.message);
+      }
     }
   );
 
-  /* Subscribe only after every listener has been attached. */
   adminOrdersChannel.subscribe(status=>{
     if(status==="SUBSCRIBED")
       console.log("Admin realtime connected.");
@@ -1777,17 +2111,21 @@ $("withdrawBtn").onclick=async()=>{
   $("withdrawBtn").disabled=false;
   $("withdrawBtn").textContent="Create Withdrawal Record";
 
-  if(error) return toast(error.message,true);
+  if(error)
+    return toast(error.message,true);
 
   toast("Withdrawal record created. Complete the real-world payout, then mark it completed.");
+
   $("withdrawAmount").value="";
   $("withdrawDestination").value="";
   $("withdrawNotes").value="";
+
   await loadWithdrawals();
 };
 
 async function loadWithdrawals(){
   const list=$("withdrawalsList");
+
   const {data,error}=await sb.from("withdrawals")
     .select("id,amount_tzs,method,destination,status,notes,created_at,completed_at")
     .order("created_at",{ascending:false})
@@ -1807,7 +2145,11 @@ async function loadWithdrawals(){
         </div>
         <span class="status">${esc(w.status)}</span>
       </div>
-      <div class="muted" style="font-size:11px;margin-top:5px">${fmtDate(w.created_at)}</div>
+
+      <div class="muted" style="font-size:11px;margin-top:5px">
+        ${fmtDate(w.created_at)}
+      </div>
+
       ${w.status==="pending" ? `
         <button class="btn small" style="margin-top:9px" onclick="completeWithdrawal('${w.id}')">
           Mark payout completed
@@ -1818,13 +2160,21 @@ async function loadWithdrawals(){
 }
 
 async function completeWithdrawal(id){
-  if(!confirm("Confirm that the real-world payout has been completed?")) return;
+  if(!confirm("Confirm that the real-world payout has been completed?"))
+    return;
 
   const {error}=await sb.rpc("complete_withdrawal",{p_withdrawal_id:id});
-  if(error) return toast(error.message,true);
+
+  if(error)
+    return toast(error.message,true);
 
   toast("Withdrawal marked completed.");
-  await Promise.all([loadWithdrawals(),loadAdminStats(),loadAdminTransactions()]);
+
+  await Promise.all([
+    loadWithdrawals(),
+    loadAdminStats(),
+    loadAdminTransactions()
+  ]);
 }
 
 /* ---------- Chat ---------- */
@@ -1848,6 +2198,7 @@ $("imagePicker").addEventListener("change",()=>{
       $("imagePicker").value="";
       return;
     }
+
     if(file.size>MAX_CHAT_IMAGE_SIZE){
       toast(`${file.name} is larger than 20MB.`,true);
       $("imagePicker").value="";
@@ -1866,12 +2217,18 @@ function renderPreviews(){
   pendingImages.forEach((file,index)=>{
     const url=URL.createObjectURL(file);
     const div=document.createElement("div");
+
     div.className="preview-item";
-    div.innerHTML=`<img src="${url}" alt="preview"><button title="Remove">×</button>`;
+    div.innerHTML=`
+      <img src="${url}" alt="preview">
+      <button title="Remove">×</button>
+    `;
+
     div.querySelector("button").onclick=()=>{
       pendingImages.splice(index,1);
       renderPreviews();
     };
+
     box.appendChild(div);
   });
 }
@@ -1882,36 +2239,45 @@ async function openChat(orderId){
     .eq("id",orderId)
     .single();
 
-  if(orderError) return toast(orderError.message,true);
-  if(order.status!=="pending") return toast("This order is already closed.",true);
+  if(orderError)
+    return toast(orderError.message,true);
+
+  if(order.status!=="pending")
+    return toast("This order is already closed.",true);
 
   activeOrderId=orderId;
+
   $("chatTitle").textContent=
     `${order.products?.name||"Order"} · ${order.profiles?.full_name||""}`;
+
   $("chatOverlay").classList.remove("hidden");
-  $("chatMessages").innerHTML='<p class="muted center">Loading messages...</p>';
+  $("chatMessages").innerHTML=
+    '<p class="muted center">Loading messages...</p>';
 
   await markOrderRead(orderId);
   await loadMessages(orderId);
 
-  if(activeChatChannel) await sb.removeChannel(activeChatChannel);
+  if(activeChatChannel)
+    await sb.removeChannel(activeChatChannel);
 
   activeChatChannel=sb.channel(`chat_${orderId}_${currentUser.id}`)
-    .on("postgres_changes",
-      {event:"INSERT",schema:"public",table:"messages",filter:`order_id=eq.${orderId}`},
+    .on(
+      "postgres_changes",
+      {
+        event:"INSERT",
+        schema:"public",
+        table:"messages",
+        filter:`order_id=eq.${orderId}`
+      },
       async payload=>{
         const incoming=payload?.new;
-        if(!incoming || incoming.order_id!==orderId) return;
-        if(incoming.sender_id===currentUser.id) return;
 
-        /*
-           IMPORTANT LIVE-CHAT RULE:
-           When this conversation is already open, the new TEXT must be
-           rendered immediately from the Realtime payload. We must NOT wait
-           for image attachment rows or signed URLs before showing the text.
-           Waiting here was the reason a live message could appear only after
-           a page refresh.
-        */
+        if(!incoming || incoming.order_id!==orderId)
+          return;
+
+        if(incoming.sender_id===currentUser.id)
+          return;
+
         if(document.querySelector(`[data-message-id="${incoming.id}"]`)){
           await markOrderRead(orderId);
           return;
@@ -1921,36 +2287,45 @@ async function openChat(orderId){
           await appendMessage(incoming);
           await markOrderRead(orderId);
 
-          /*
-             If this message also has images, load the attachment rows in the
-             background and add them to the SAME bubble. The conversation does
-             not wait for image loading before displaying the text.
-          */
           (async()=>{
             let fullMessage=null;
+
             for(let attempt=0;attempt<20;attempt++){
               const result=await sb.from("messages")
                 .select("id,order_id,sender_id,text,created_at,read_at,message_attachments(id,storage_path,mime_type)")
                 .eq("id",incoming.id)
                 .single();
 
-              if(result.error || !result.data) break;
+              if(result.error || !result.data)
+                break;
+
               fullMessage=result.data;
-              if((fullMessage.message_attachments||[]).length>0 || attempt>=19) break;
+
+              if(
+                (fullMessage.message_attachments||[]).length>0 ||
+                attempt>=19
+              )
+                break;
+
               await new Promise(resolve=>setTimeout(resolve,250));
             }
 
             if(fullMessage?.message_attachments?.length){
-              await appendMessageAttachments(incoming.id,fullMessage.message_attachments);
+              await appendMessageAttachments(
+                incoming.id,
+                fullMessage.message_attachments
+              );
             }
-          })().catch(error=>console.warn("Realtime attachment load:",error.message));
+          })().catch(error=>{
+            console.warn("Realtime attachment load:",error.message);
+          });
+
           return;
         }
 
-        /* Image-only message: wait for its attachment row, but never create
-           an empty bubble while the upload is still in progress. */
         let fullMessage=null;
         let messageError=null;
+
         for(let attempt=0;attempt<80;attempt++){
           const result=await sb.from("messages")
             .select("id,order_id,sender_id,text,created_at,read_at,message_attachments(id,storage_path,mime_type)")
@@ -1959,8 +2334,16 @@ async function openChat(orderId){
 
           fullMessage=result.data;
           messageError=result.error;
-          if(messageError || !fullMessage) break;
-          if((fullMessage.message_attachments||[]).length>0 || attempt>=79) break;
+
+          if(messageError || !fullMessage)
+            break;
+
+          if(
+            (fullMessage.message_attachments||[]).length>0 ||
+            attempt>=79
+          )
+            break;
+
           await new Promise(resolve=>setTimeout(resolve,250));
         }
 
@@ -1970,18 +2353,34 @@ async function openChat(orderId){
         }else if(messageError){
           console.error("Realtime message load error:",messageError);
         }
-      })
-    .on("postgres_changes",
-      {event:"UPDATE",schema:"public",table:"orders",filter:`id=eq.${orderId}`},
+      }
+    )
+    .on(
+      "postgres_changes",
+      {
+        event:"UPDATE",
+        schema:"public",
+        table:"orders",
+        filter:`id=eq.${orderId}`
+      },
       async payload=>{
         const updated=payload.new||{};
+
         if(updated.id===orderId && updated.status!=="pending"){
           closeChat();
           toast("Order delivered. This conversation is now closed.");
-          if(currentProfile?.is_admin) await Promise.all([loadAdminOrders(adminOrderFilter),loadAdminStats()]);
-          else await loadMyOrders();
+
+          if(currentProfile?.is_admin){
+            await Promise.all([
+              loadAdminOrders(adminOrderFilter),
+              loadAdminStats()
+            ]);
+          }else{
+            await loadMyOrders();
+          }
         }
-      })
+      }
+    )
     .subscribe();
 
   $("chatInput").focus();
@@ -2001,43 +2400,66 @@ async function loadMessages(orderId){
     return;
   }
 
-  for(const message of (data||[])) await appendMessage(message);
+  for(const message of (data||[]))
+    await appendMessage(message);
+
   box.scrollTop=box.scrollHeight;
 }
 
 async function appendMessageAttachments(messageId,attachments){
-  if(!attachments?.length) return;
+  if(!attachments?.length)return;
+
   const row=document.querySelector(`[data-message-id="${messageId}"]`);
-  if(!row) return;
+
+  if(!row)return;
+
   const bubble=row.querySelector(".bubble");
-  if(!bubble || bubble.querySelector(".attachments")) return;
+
+  if(!bubble || bubble.querySelector(".attachments"))
+    return;
 
   const attBox=document.createElement("div");
   attBox.className="attachments";
+
   const paths=attachments.map(att=>att.storage_path);
+
   const {data:signedData,error:signedError}=await sb.storage
     .from(CHAT_BUCKET)
     .createSignedUrls(paths,3600);
 
-  if(signedError || !Array.isArray(signedData)) return;
+  if(signedError || !Array.isArray(signedData))
+    return;
 
   const imageJobs=signedData.map(signed=>new Promise(resolve=>{
-    if(!signed?.signedUrl){resolve(null);return;}
+    if(!signed?.signedUrl){
+      resolve(null);
+      return;
+    }
+
     const img=document.createElement("img");
     img.alt="Chat image";
     img.loading="eager";
     img.decoding="async";
     img.src=signed.signedUrl;
     img.onclick=()=>window.open(signed.signedUrl,"_blank","noopener");
+
     const done=()=>resolve(img);
+
     img.addEventListener("load",done,{once:true});
     img.addEventListener("error",()=>resolve(null),{once:true});
-    if(img.complete) resolve(img.naturalWidth>0?img:null);
+
+    if(img.complete)
+      resolve(img.naturalWidth>0?img:null);
   }));
 
   const loadedImages=await Promise.all(imageJobs);
-  for(const img of loadedImages) if(img) attBox.appendChild(img);
-  if(attBox.children.length) bubble.appendChild(attBox);
+
+  for(const img of loadedImages)
+    if(img)
+      attBox.appendChild(img);
+
+  if(attBox.children.length)
+    bubble.appendChild(attBox);
 }
 
 async function appendMessage(message){
@@ -2045,13 +2467,8 @@ async function appendMessage(message){
   const isMe=message.sender_id===currentUser.id;
   const attachments=message.message_attachments||[];
 
-  /*
-     Build the complete message first. This prevents an image-only message
-     from appearing as an empty bubble while Storage is still resolving.
-     Signed URLs are generated in one request and the browser is allowed to
-     decode every image before the bubble is inserted into the conversation.
-  */
   const row=document.createElement("div");
+
   row.className="message-row"+(isMe?" me":"");
   row.dataset.messageId=message.id;
 
@@ -2069,13 +2486,17 @@ async function appendMessage(message){
     attBox.className="attachments";
 
     const paths=attachments.map(att=>att.storage_path);
+
     const {data:signedData,error:signedError}=await sb.storage
       .from(CHAT_BUCKET)
       .createSignedUrls(paths,3600);
 
     if(!signedError && Array.isArray(signedData)){
-      const imageJobs=signedData.map((signed,index)=>new Promise(resolve=>{
-        if(!signed?.signedUrl){ resolve(); return; }
+      const imageJobs=signedData.map(signed=>new Promise(resolve=>{
+        if(!signed?.signedUrl){
+          resolve();
+          return;
+        }
 
         const img=document.createElement("img");
         img.alt="Chat image";
@@ -2085,39 +2506,49 @@ async function appendMessage(message){
         img.onclick=()=>window.open(signed.signedUrl,"_blank","noopener");
 
         const done=()=>resolve(img);
+
         img.addEventListener("load",done,{once:true});
         img.addEventListener("error",()=>resolve(null),{once:true});
 
-        /* Already cached images may complete before the listeners run. */
-        if(img.complete) resolve(img.naturalWidth>0?img:null);
+        if(img.complete)
+          resolve(img.naturalWidth>0?img:null);
       }));
 
       const loadedImages=await Promise.all(imageJobs);
+
       for(const img of loadedImages){
-        if(img) attBox.appendChild(img);
+        if(img)
+          attBox.appendChild(img);
       }
     }
 
-    if(attBox.children.length) bubble.appendChild(attBox);
+    if(attBox.children.length)
+      bubble.appendChild(attBox);
   }
 
-  /* Do not create a completely empty bubble if neither text nor an image
-     could be rendered. */
-  if(!bubble.childNodes.length) return;
+  if(!bubble.childNodes.length)
+    return;
 
   const time=document.createElement("div");
+
   time.className="message-time";
   time.textContent=fmtDate(message.created_at);
 
   row.appendChild(bubble);
   row.appendChild(time);
+
   box.appendChild(row);
   box.scrollTop=box.scrollHeight;
 }
 
 async function markOrderRead(orderId){
-  const {error}=await sb.rpc("mark_order_messages_read",{p_order_id:orderId});
-  if(error) console.error("mark read:",error.message);
+  const {error}=await sb.rpc(
+    "mark_order_messages_read",
+    {p_order_id:orderId}
+  );
+
+  if(error)
+    console.error("mark read:",error.message);
 
   if(currentProfile?.is_admin){
     await Promise.all([
@@ -2140,14 +2571,22 @@ $("chatInput").addEventListener("keydown",e=>{
 });
 
 async function sendMessage(){
-  if(!activeOrderId) return;
+  if(!activeOrderId)return;
 
   const {data:activeOrder,error:activeOrderError}=await sb.from("orders")
-    .select("status").eq("id",activeOrderId).single();
-  if(activeOrderError) return toast(activeOrderError.message,true);
+    .select("status")
+    .eq("id",activeOrderId)
+    .single();
+
+  if(activeOrderError)
+    return toast(activeOrderError.message,true);
+
   if(activeOrder?.status!=="pending"){
     closeChat();
-    return toast("This order is closed. The conversation can no longer receive messages.",true);
+    return toast(
+      "This order is closed. The conversation can no longer receive messages.",
+      true
+    );
   }
 
   const text=$("chatInput").value.trim();
@@ -2174,9 +2613,11 @@ async function sendMessage(){
     return toast(error.message,true);
   }
 
-  if(text) $("chatInput").value="";
+  if(text)
+    $("chatInput").value="";
 
   const files=[...pendingImages];
+
   pendingImages=[];
   $("imagePicker").value="";
   renderPreviews();
@@ -2184,7 +2625,9 @@ async function sendMessage(){
   if(files.length){
     for(const file of files){
       const safeName=file.name.replace(/[^a-zA-Z0-9._-]/g,"_");
-      const path=`${currentUser.id}/${activeOrderId}/${message.id}/${crypto.randomUUID()}-${safeName}`;
+
+      const path=
+        `${currentUser.id}/${activeOrderId}/${message.id}/${crypto.randomUUID()}-${safeName}`;
 
       const {error:uploadError}=await sb.storage
         .from(CHAT_BUCKET)
@@ -2206,7 +2649,8 @@ async function sendMessage(){
         file_size:file.size
       });
 
-      if(attachError) console.error(attachError);
+      if(attachError)
+        console.error(attachError);
     }
 
     await loadMessages(activeOrderId);
@@ -2219,8 +2663,10 @@ async function sendMessage(){
 
 function closeChat(){
   $("chatOverlay").classList.add("hidden");
+
   activeOrderId=null;
   pendingImages=[];
+
   $("imagePicker").value="";
   renderPreviews();
 
@@ -2231,56 +2677,125 @@ function closeChat(){
 }
 
 /* ---------- ONE DEVICE / SESSION MONITOR ---------- */
+
 let sessionChannel=null;
 let adminSessionView="active";
-let currentSessionId=localStorage.getItem("green_store_session_id")||null;
-let currentSessionKey=localStorage.getItem("green_store_session_key")||null;
-let currentDeviceId=localStorage.getItem("green_store_device_id");
+
+let currentSessionId=
+  localStorage.getItem("green_store_session_id")||null;
+
+let currentSessionKey=
+  localStorage.getItem("green_store_session_key")||null;
+
+let currentDeviceId=
+  localStorage.getItem("green_store_device_id");
+
 if(!currentDeviceId){
-  currentDeviceId=(crypto.randomUUID?crypto.randomUUID():`${Date.now()}-${Math.random().toString(36).slice(2)}`);
-  localStorage.setItem("green_store_device_id",currentDeviceId);
+  currentDeviceId=
+    (crypto.randomUUID
+      ? crypto.randomUUID()
+      : `${Date.now()}-${Math.random().toString(36).slice(2)}`);
+
+  localStorage.setItem(
+    "green_store_device_id",
+    currentDeviceId
+  );
 }
-function browserName(){const u=navigator.userAgent;return /Edg\//.test(u)?"Edge":/Chrome\//.test(u)?"Chrome":/Firefox\//.test(u)?"Firefox":/Safari\//.test(u)?"Safari":"Browser";}
-function osName(){const u=navigator.userAgent;return /Windows/i.test(u)?"Windows":/Android/i.test(u)?"Android":/iPhone|iPad|iPod/i.test(u)?"iOS":/Mac OS X/i.test(u)?"macOS":/Linux/i.test(u)?"Linux":"Unknown";}
-function deviceName(){return `${browserName()} on ${osName()}`;}
-function clearStoredLoginSession(){currentSessionId=null;currentSessionKey=null;localStorage.removeItem("green_store_session_id");localStorage.removeItem("green_store_session_key");}
+
+function browserName(){
+  const u=navigator.userAgent;
+
+  return /Edg\//.test(u)
+    ?"Edge"
+    :/Chrome\//.test(u)
+    ?"Chrome"
+    :/Firefox\//.test(u)
+    ?"Firefox"
+    :/Safari\//.test(u)
+    ?"Safari"
+    :"Browser";
+}
+
+function osName(){
+  const u=navigator.userAgent;
+
+  return /Windows/i.test(u)
+    ?"Windows"
+    :/Android/i.test(u)
+    ?"Android"
+    :/iPhone|iPad|iPod/i.test(u)
+    ?"iOS"
+    :/Mac OS X/i.test(u)
+    ?"macOS"
+    :/Linux/i.test(u)
+    ?"Linux"
+    :"Unknown";
+}
+
+function deviceName(){
+  return `${browserName()} on ${osName()}`;
+}
+
+function clearStoredLoginSession(){
+  currentSessionId=null;
+  currentSessionKey=null;
+
+  localStorage.removeItem("green_store_session_id");
+  localStorage.removeItem("green_store_session_key");
+}
 
 async function registerSession(forceNew=false){
   if(!sb||!currentUser)return false;
 
-  /*
-     IMPORTANT: create_login_session() must only run when this browser
-     does not already have a valid session. Calling it every time the
-     monitor is initialized creates duplicate device sessions.
-  */
   if(!forceNew && currentSessionId){
     try{
-      const {data,error}=await sb.rpc("check_login_session",{p_session_id:currentSessionId});
-      if(!error && data?.valid){
+      const {data,error}=await sb.rpc(
+        "check_login_session",
+        {p_session_id:currentSessionId}
+      );
+
+      if(!error && data?.valid)
         return true;
-      }
+
     }catch(e){
       console.warn("Existing session validation:",e.message);
     }
 
-    /* A stored session that is no longer valid must not be reused. */
     clearStoredLoginSession();
   }
 
   try{
-    const {data,error}=await sb.rpc("create_login_session",{
-      p_device_id:currentDeviceId,
-      p_device_name:deviceName(),
-      p_browser:browserName(),
-      p_operating_system:osName(),
-      p_user_agent:navigator.userAgent
-    });
-    if(error) throw error;
+    const {data,error}=await sb.rpc(
+      "create_login_session",
+      {
+        p_device_id:currentDeviceId,
+        p_device_name:deviceName(),
+        p_browser:browserName(),
+        p_operating_system:osName(),
+        p_user_agent:navigator.userAgent
+      }
+    );
+
+    if(error)
+      throw error;
+
     currentSessionId=data?.session_id||null;
     currentSessionKey=data?.session_key||null;
-    if(currentSessionId)localStorage.setItem("green_store_session_id",currentSessionId);
-    if(currentSessionKey)localStorage.setItem("green_store_session_key",currentSessionKey);
+
+    if(currentSessionId)
+      localStorage.setItem(
+        "green_store_session_id",
+        currentSessionId
+      );
+
+    if(currentSessionKey)
+      localStorage.setItem(
+        "green_store_session_key",
+        currentSessionKey
+      );
+
     return !!currentSessionId;
+
   }catch(e){
     console.warn("Session registration failed:",e.message);
     toast("Could not start secure login session: "+e.message,true);
@@ -2289,29 +2804,58 @@ async function registerSession(forceNew=false){
 }
 
 async function heartbeatSession(){
-  if(!sb||!currentUser||!currentSessionId)return false;
+  if(!sb||!currentUser||!currentSessionId)
+    return false;
+
   try{
-    const {data,error}=await sb.rpc("session_heartbeat",{p_session_id:currentSessionId});
-    if(error) throw error;
+    const {data,error}=await sb.rpc(
+      "session_heartbeat",
+      {p_session_id:currentSessionId}
+    );
+
+    if(error)
+      throw error;
+
     if(data!==true){
-      await handleSessionRevoked("Your session is no longer active.");
+      await handleSessionRevoked(
+        "Your session is no longer active."
+      );
       return false;
     }
+
     return true;
-  }catch(e){console.warn("Session heartbeat:",e.message);return false;}
+
+  }catch(e){
+    console.warn("Session heartbeat:",e.message);
+    return false;
+  }
 }
 
 async function validateSession(){
-  if(!sb||!currentUser)return true;
-  if(!currentSessionId)return false;
+  if(!sb||!currentUser)
+    return true;
+
+  if(!currentSessionId)
+    return false;
+
   try{
-    const {data,error}=await sb.rpc("check_login_session",{p_session_id:currentSessionId});
-    if(error) throw error;
+    const {data,error}=await sb.rpc(
+      "check_login_session",
+      {p_session_id:currentSessionId}
+    );
+
+    if(error)
+      throw error;
+
     if(!data?.valid){
-      await handleSessionRevoked("This session was revoked or is no longer active.");
+      await handleSessionRevoked(
+        "This session was revoked or is no longer active."
+      );
       return false;
     }
+
     return true;
+
   }catch(e){
     console.warn("Session validation:",e.message);
     return false;
@@ -2319,175 +2863,409 @@ async function validateSession(){
 }
 
 async function handleSessionRevoked(message){
-  toast(message||"Your session was revoked. Logging out.",true);
+  toast(
+    message||"Your session was revoked. Logging out.",
+    true
+  );
+
   clearStoredLoginSession();
-  try{await sb.auth.signOut();}catch(e){}
+
+  try{
+    await sb.auth.signOut();
+  }catch(e){}
+
   setTimeout(()=>location.reload(),250);
 }
 
 async function loadAdminSessions(){
-  const list=$("adminSessionsList");if(!list||!sb||!currentProfile?.is_admin)return;
-  list.innerHTML='<p class="muted">Loading sessions...</p>';
+  const list=$("adminSessionsList");
+
+  if(!list||!sb||!currentProfile?.is_admin)
+    return;
+
+  list.innerHTML=
+    '<p class="muted">Loading sessions...</p>';
+
   try{
-    /* user_sessions references auth.users, not profiles. Therefore do NOT use profiles(...) here. */
     const {data:sessions,error}=await sb.from("user_sessions")
       .select("id,user_id,session_key,device_id,device_name,browser,operating_system,ip_address,user_agent,is_active,revoked,login_at,last_seen_at,logout_at,revoked_at,created_at")
-      .order("last_seen_at",{ascending:false}).limit(500);
-    if(error)throw error;
-    if(!sessions?.length){list.innerHTML='<p class="muted">No sessions recorded.</p>';return;}
+      .order("last_seen_at",{ascending:false})
+      .limit(500);
 
-    const userIds=[...new Set(sessions.map(x=>x.user_id).filter(Boolean))];
+    if(error)
+      throw error;
+
+    if(!sessions?.length){
+      list.innerHTML=
+        '<p class="muted">No sessions recorded.</p>';
+      return;
+    }
+
+    const userIds=[
+      ...new Set(
+        sessions
+          .map(x=>x.user_id)
+          .filter(Boolean)
+      )
+    ];
+
     let profilesById={};
+
     if(userIds.length){
-      const {data:profiles,error:profileError}=await sb.from("profiles").select("id,full_name,email,is_admin").in("id",userIds);
-      if(!profileError)(profiles||[]).forEach(p=>profilesById[p.id]=p);
+      const {data:profiles,error:profileError}=
+        await sb.from("profiles")
+          .select("id,full_name,email,is_admin")
+          .in("id",userIds);
+
+      if(!profileError)
+        (profiles||[]).forEach(
+          p=>profilesById[p.id]=p
+        );
     }
 
     const filtered=sessions.filter(x=>{
       const revoked=!!x.revoked;
       const active=x.is_active===true&&!revoked;
-      return adminSessionView==="active" ? active : !active;
+
+      return adminSessionView==="active"
+        ? active
+        : !active;
     });
 
     if(!filtered.length){
-      list.innerHTML=adminSessionView==="active"
-        ? '<p class="muted">No active sessions.</p>'
-        : '<p class="muted">No archived sessions.</p>';
+      list.innerHTML=
+        adminSessionView==="active"
+          ? '<p class="muted">No active sessions.</p>'
+          : '<p class="muted">No archived sessions.</p>';
+
       return;
     }
 
-    list.innerHTML=`<div class="session-grid">${filtered.map(x=>{
-      const profile=profilesById[x.user_id]||{};
-      const revoked=!!x.revoked, active=x.is_active===true&&!revoked;
-      return `<div class="session-card">
-        <div style="display:flex;justify-content:space-between;gap:8px">
-          <div><strong>${esc(x.device_name||"Unknown device")}</strong>
-          <div class="muted" style="font-size:11px;margin-top:4px">${esc(profile.full_name||profile.email||x.user_id||"Unknown user")}</div></div>
-          <span class="session-status ${revoked?"revoked":active?"active":"inactive"}">${revoked?"REVOKED":active?"ACTIVE":"INACTIVE"}</span>
-        </div>
-        <div class="session-meta">
-          <div><span>Browser</span><br>${esc(x.browser||"—")}</div>
-          <div><span>OS</span><br>${esc(x.operating_system||"—")}</div>
-          <div><span>IP</span><br>${esc(x.ip_address||"Not exposed")}</div>
-          <div><span>Login</span><br>${fmtDate(x.login_at)}</div>
-          <div><span>Last seen</span><br>${fmtDate(x.last_seen_at)}</div>
-          <div><span>Email</span><br>${esc(profile.email||"—")}</div>
-        </div>
-        <div style="margin-top:10px;display:flex;gap:7px;flex-wrap:wrap">
-          ${active?`<button class="btn danger small" onclick="revokeSession('${x.id}')">Force Logout</button><button class="btn secondary small" onclick="revokeUserSessions('${x.user_id}')">Force Logout All</button>`:""}
-        </div>
-      </div>`;
-    }).join("")}</div>`;
+    list.innerHTML=`
+      <div class="session-grid">
+        ${filtered.map(x=>{
+          const profile=profilesById[x.user_id]||{};
+          const revoked=!!x.revoked;
+          const active=x.is_active===true&&!revoked;
+
+          return `
+            <div class="session-card">
+
+              <div style="display:flex;justify-content:space-between;gap:8px">
+
+                <div>
+                  <strong>
+                    ${esc(x.device_name||"Unknown device")}
+                  </strong>
+
+                  <div class="muted" style="font-size:11px;margin-top:4px">
+                    ${esc(
+                      profile.full_name||
+                      profile.email||
+                      x.user_id||
+                      "Unknown user"
+                    )}
+                  </div>
+                </div>
+
+                <span class="session-status ${
+                  revoked
+                    ?"revoked"
+                    :active
+                    ?"active"
+                    :"inactive"
+                }">
+                  ${
+                    revoked
+                      ?"REVOKED"
+                      :active
+                      ?"ACTIVE"
+                      :"INACTIVE"
+                  }
+                </span>
+
+              </div>
+
+              <div class="session-meta">
+
+                <div>
+                  <span>Browser</span><br>
+                  ${esc(x.browser||"—")}
+                </div>
+
+                <div>
+                  <span>OS</span><br>
+                  ${esc(x.operating_system||"—")}
+                </div>
+
+                <div>
+                  <span>IP</span><br>
+                  ${esc(x.ip_address||"Not exposed")}
+                </div>
+
+                <div>
+                  <span>Login</span><br>
+                  ${fmtDate(x.login_at)}
+                </div>
+
+                <div>
+                  <span>Last seen</span><br>
+                  ${fmtDate(x.last_seen_at)}
+                </div>
+
+                <div>
+                  <span>Email</span><br>
+                  ${esc(profile.email||"—")}
+                </div>
+
+              </div>
+
+              <div style="margin-top:10px;display:flex;gap:7px;flex-wrap:wrap">
+
+                ${
+                  active
+                    ? `
+                      <button
+                        class="btn danger small"
+                        onclick="revokeSession('${x.id}')"
+                      >
+                        Force Logout
+                      </button>
+
+                      <button
+                        class="btn secondary small"
+                        onclick="revokeUserSessions('${x.user_id}')"
+                      >
+                        Force Logout All
+                      </button>
+                    `
+                    :""
+                }
+
+              </div>
+
+            </div>
+          `;
+        }).join("")}
+      </div>
+    `;
+
   }catch(e){
-    list.innerHTML=`<div class="form-note">Session table unavailable: ${esc(e.message)}</div>`;
+    list.innerHTML=`
+      <div class="form-note">
+        Session table unavailable: ${esc(e.message)}
+      </div>
+    `;
   }
 }
 
 async function revokeSession(id){
-  if(!confirm("Force logout this device?"))return;
-  const {data,error}=await sb.rpc("admin_force_logout",{p_session_id:id});
-  if(error)return toast(error.message,true);
-  if(data!==true)return toast("Session could not be revoked.",true);
+  if(!confirm("Force logout this device?"))
+    return;
+
+  const {data,error}=await sb.rpc(
+    "admin_force_logout",
+    {p_session_id:id}
+  );
+
+  if(error)
+    return toast(error.message,true);
+
+  if(data!==true)
+    return toast("Session could not be revoked.",true);
+
   toast("Device session revoked.");
   await loadAdminSessions();
 }
 
 async function revokeUserSessions(uid){
-  if(!confirm("Force logout all sessions for this user?"))return;
-  const {data,error}=await sb.rpc("admin_force_logout_user",{p_user_id:uid});
-  if(error)return toast(error.message,true);
+  if(!confirm("Force logout all sessions for this user?"))
+    return;
+
+  const {data,error}=await sb.rpc(
+    "admin_force_logout_user",
+    {p_user_id:uid}
+  );
+
+  if(error)
+    return toast(error.message,true);
+
   toast(`${Number(data)||0} session(s) revoked.`);
   await loadAdminSessions();
 }
 
-if($("activeSessionsBtn"))$("activeSessionsBtn").onclick=()=>{
+if($("activeSessionsBtn"))
+$("activeSessionsBtn").onclick=()=>{
   adminSessionView="active";
+
   $("activeSessionsBtn").classList.remove("secondary");
   $("archivedSessionsBtn").classList.add("secondary");
+
   loadAdminSessions();
 };
 
-if($("archivedSessionsBtn"))$("archivedSessionsBtn").onclick=()=>{
+if($("archivedSessionsBtn"))
+$("archivedSessionsBtn").onclick=()=>{
   adminSessionView="archived";
+
   $("archivedSessionsBtn").classList.remove("secondary");
   $("activeSessionsBtn").classList.add("secondary");
+
   loadAdminSessions();
 };
 
-if($("refreshSessionsBtn"))$("refreshSessionsBtn").onclick=loadAdminSessions;
+if($("refreshSessionsBtn"))
+$("refreshSessionsBtn").onclick=loadAdminSessions;
 
 async function setupSessionMonitor(){
-  if(!currentUser)return;
+  if(!currentUser)
+    return;
 
   let ready=false;
+
   if(currentSessionId){
     ready=await validateSession();
   }else{
     ready=await registerSession();
   }
-  if(!ready)return;
+
+  if(!ready)
+    return;
 
   clearInterval(window.__sessionHeartbeat);
+
   window.__sessionHeartbeat=setInterval(async()=>{
-    if(await validateSession()) await heartbeatSession();
+    if(await validateSession())
+      await heartbeatSession();
   },30000);
 
-  if(sessionChannel)sb.removeChannel(sessionChannel);
-  sessionChannel=sb.channel(`session_watch_${currentUser.id}_${currentSessionId}`)
-    .on("postgres_changes",{event:"UPDATE",schema:"public",table:"user_sessions",filter:`user_id=eq.${currentUser.id}`},async p=>{
-      const row=p.new||{};
-      if(row.id===currentSessionId && (row.revoked===true || row.is_active===false)){
-        await handleSessionRevoked("Your session was revoked by another login or an administrator.");
-        return;
+  if(sessionChannel)
+    sb.removeChannel(sessionChannel);
+
+  sessionChannel=sb.channel(
+    `session_watch_${currentUser.id}_${currentSessionId}`
+  )
+    .on(
+      "postgres_changes",
+      {
+        event:"UPDATE",
+        schema:"public",
+        table:"user_sessions",
+        filter:`user_id=eq.${currentUser.id}`
+      },
+      async p=>{
+        const row=p.new||{};
+
+        if(
+          row.id===currentSessionId &&
+          (row.revoked===true || row.is_active===false)
+        ){
+          await handleSessionRevoked(
+            "Your session was revoked by another login or an administrator."
+          );
+          return;
+        }
+
+        if(currentProfile?.is_admin)
+          loadAdminSessions();
       }
-      if(currentProfile?.is_admin)loadAdminSessions();
-    }).subscribe();
+    )
+    .subscribe();
 }
 
 /* ---------- Tabs ---------- */
 
 document.querySelectorAll("[data-customer-tab]").forEach(btn=>{
   btn.onclick=()=>{
-    document.querySelectorAll("[data-customer-tab]").forEach(b=>b.classList.add("secondary"));
+    document
+      .querySelectorAll("[data-customer-tab]")
+      .forEach(b=>b.classList.add("secondary"));
+
     btn.classList.remove("secondary");
 
-    $("customerProductsTab").classList.toggle("hidden",btn.dataset.customerTab!=="products");
-    $("customerOrdersTab").classList.toggle("hidden",btn.dataset.customerTab!=="orders");
-    $("customerTransactionsTab").classList.toggle("hidden",btn.dataset.customerTab!=="transactions");
+    $("customerProductsTab").classList.toggle(
+      "hidden",
+      btn.dataset.customerTab!=="products"
+    );
+
+    $("customerOrdersTab").classList.toggle(
+      "hidden",
+      btn.dataset.customerTab!=="orders"
+    );
+
+    $("customerTransactionsTab").classList.toggle(
+      "hidden",
+      btn.dataset.customerTab!=="transactions"
+    );
   };
 });
 
 document.addEventListener("visibilitychange",()=>{
-  if(document.visibilityState==="visible" && currentProfile?.is_admin){
+  if(
+    document.visibilityState==="visible" &&
+    currentProfile?.is_admin
+  ){
     refreshAdminLiveData();
   }
 });
 
 document.querySelectorAll("[data-admin-tab]").forEach(btn=>{
   btn.onclick=()=>{
-    document.querySelectorAll("[data-admin-tab]").forEach(b=>b.classList.add("secondary"));
+    document
+      .querySelectorAll("[data-admin-tab]")
+      .forEach(b=>b.classList.add("secondary"));
+
     btn.classList.remove("secondary");
 
     const tab=btn.dataset.adminTab;
-    $("adminOrdersTab").classList.toggle("hidden",tab!=="orders");
-    $("adminUsersTab").classList.toggle("hidden",tab!=="users");
-    $("adminTransactionsTab").classList.toggle("hidden",tab!=="transactions");
-    $("adminWithdrawTab").classList.toggle("hidden",tab!=="withdraw");
-    $("adminSessionsTab").classList.toggle("hidden",tab!=="sessions");
+
+    $("adminOrdersTab").classList.toggle(
+      "hidden",
+      tab!=="orders"
+    );
+
+    $("adminUsersTab").classList.toggle(
+      "hidden",
+      tab!=="users"
+    );
+
+    $("adminTransactionsTab").classList.toggle(
+      "hidden",
+      tab!=="transactions"
+    );
+
+    $("adminWithdrawTab").classList.toggle(
+      "hidden",
+      tab!=="withdraw"
+    );
+
+    $("adminSessionsTab").classList.toggle(
+      "hidden",
+      tab!=="sessions"
+    );
+
     if(tab==="orders"){
       loadAdminOrders(adminOrderFilter);
       refreshAdminUnreadState(false);
     }
-    if(tab==="sessions") loadAdminSessions();
+
+    if(tab==="sessions")
+      loadAdminSessions();
   };
 });
 
 /* ---------- Basic anti-copy UI from the original ---------- */
 
-document.addEventListener("contextmenu",e=>e.preventDefault());
+document.addEventListener(
+  "contextmenu",
+  e=>e.preventDefault()
+);
 
 document.addEventListener("keydown",e=>{
-  if((e.ctrlKey||e.metaKey) && e.key.toLowerCase()==="s"){
+  if(
+    (e.ctrlKey||e.metaKey) &&
+    e.key.toLowerCase()==="s"
+  ){
     e.preventDefault();
     toast("Saving disabled.");
   }
