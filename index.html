@@ -263,7 +263,7 @@ th{color:#9bd49e}
 <section id="unlock">
   <div class="card">
     <div class="center">
-        <h2 class="green">🌿 Calculator</h2>
+      <h2 class="green">🌿 Calculator</h2>
       <p class="muted" style="margin-top:5px">Pure quality to the power of infinity.</p>
     </div>
     <div id="calcDisplay" style="margin-top:14px">0</div>
@@ -1268,9 +1268,26 @@ async function getUnreadCounts(orderIds){
   const result={};
   if(!orderIds?.length) return result;
 
+  /*
+   * UNREAD IS ONLY VALID FOR OPEN/PENDING ORDERS.
+   * Once an order is closed (delivered/cancelled/etc.), its old unread
+   * messages must no longer contribute to any badge or unread total.
+   */
+  const {data:orders,error:ordersError}=await sb.from("orders")
+    .select("id,status")
+    .in("id",orderIds);
+
+  if(ordersError) return result;
+
+  const pendingOrderIds=(orders||[])
+    .filter(o=>o.status==="pending")
+    .map(o=>o.id);
+
+  if(!pendingOrderIds.length) return result;
+
   const {data,error}=await sb.from("messages")
     .select("order_id,sender_id,read_at")
-    .in("order_id",orderIds)
+    .in("order_id",pendingOrderIds)
     .is("read_at",null);
 
   if(error) return result;
