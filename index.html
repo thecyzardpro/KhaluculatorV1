@@ -1317,7 +1317,23 @@ async function getUnreadCounts(orderIds){
 
   if(error) return result;
 
+  /* Closed/delivered orders must never contribute unread chat counts.
+     Their conversation is considered closed together with the order. */
+  const closedOrderIds=new Set();
+  try{
+    const {data:closedOrders}=await sb.from("orders")
+      .select("id,status")
+      .in("id",orderIds);
+    (closedOrders||[]).forEach(o=>{
+      if(o.status==="delivered" || o.status==="closed" || o.status==="completed")
+        closedOrderIds.add(o.id);
+    });
+  }catch(e){
+    console.warn("Closed order unread check:",e.message);
+  }
+
   (data||[]).forEach(m=>{
+    if(closedOrderIds.has(m.order_id)) return;
     if(m.sender_id!==currentUser.id)
       result[m.order_id]=(result[m.order_id]||0)+1;
   });
