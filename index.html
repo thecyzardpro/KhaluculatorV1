@@ -192,6 +192,26 @@ label{display:block;font-size:13px;color:var(--muted);margin:10px 0 6px}
 .location-box{
   border:1px solid #284e2b;border-radius:12px;padding:12px;background:#0a0f0b
 }
+.payment-method-box{margin-top:12px;border:1px solid #284e2b;border-radius:12px;padding:12px;background:#0a0f0b}
+.payment-method-title{font-size:13px;font-weight:800;margin-bottom:9px}
+.payment-methods{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.payment-option{position:relative}
+.payment-option input{position:absolute;opacity:0;pointer-events:none}
+.payment-option label{display:flex;align-items:center;gap:9px;margin:0;padding:12px;border:1px solid #2d5d32;border-radius:11px;background:#0b100c;color:#fff;cursor:pointer;transition:.15s}
+.payment-option label:hover{border-color:#4caf50}
+.payment-option input:checked + label{border-color:#4caf50;background:#143619;box-shadow:0 0 0 1px #4caf50 inset}
+.payment-icon{font-size:19px}
+.payment-copy strong{display:block;font-size:13px}
+.payment-copy span{display:block;font-size:10px;color:#9aa59b;margin-top:2px}
+.payment-badge{display:inline-flex;align-items:center;gap:4px;padding:3px 7px;border-radius:999px;background:#1b2d1d;border:1px solid #315d35;color:#9bd49e;font-size:10px;font-weight:800;margin-top:7px}
+.admin-new-message-badge{
+  display:inline-flex;align-items:center;gap:5px;
+  margin-top:8px;padding:5px 8px;border-radius:999px;
+  background:#4a1515;border:1px solid #ef5350;color:#ffb3b3;
+  font-size:10px;font-weight:900;letter-spacing:.02em
+}
+@media(max-width:520px){.payment-methods{grid-template-columns:1fr}}
+
 .table-wrap{overflow:auto}
 table{width:100%;border-collapse:collapse;min-width:650px}
 th,td{padding:10px;border-bottom:1px solid #1b2b1c;text-align:left;font-size:13px}
@@ -201,7 +221,34 @@ th{color:#9bd49e}
   background:#101810;border:1px solid var(--green);border-radius:12px;
   padding:12px 14px;box-shadow:var(--shadow);max-width:360px
 }
+
+.form-shell{background:linear-gradient(180deg,#0e150f,#080b08);border:1px solid #295e30;border-radius:16px;padding:18px}
+.form-title{display:flex;align-items:center;gap:10px;margin-bottom:4px}
+.form-icon{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;background:#143619;border:1px solid #2d7134;font-size:20px}
+.form-help{font-size:12px;line-height:1.5;color:var(--muted);margin:8px 0 12px}
+.field{margin-top:11px}.field label{margin-top:0}
+.input-wrap{position:relative}.input-wrap input{padding-right:90px}
+.currency-tag{position:absolute;right:10px;top:50%;transform:translateY(-50%);font-size:11px;color:#8ebf92;background:#132516;border:1px solid #2a5230;border-radius:999px;padding:4px 7px}
+.form-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.form-note{font-size:11px;color:#8ea291;margin-top:10px;padding:9px 10px;border-radius:10px;background:#0a100b;border:1px solid #1e3521}
+.reset-shell{margin-top:14px}.closed-chat{margin:auto;text-align:center;padding:30px 20px;color:var(--muted)}.closed-chat strong{display:block;color:#fff;font-size:18px;margin-bottom:7px}
+.footer{margin-top:35px;border-top:1px solid #1b321d;padding:30px 0 10px;color:var(--muted)}
+.footer-grid{display:grid;grid-template-columns:1.5fr 1fr 1fr 1fr;gap:25px}
+.footer h3{color:#fff;margin-bottom:9px;font-size:18px}.footer h4{color:#9bd49e;margin-bottom:10px;font-size:12px;letter-spacing:.08em}
+.footer p{font-size:12px;line-height:1.6}.footer a{display:block;color:#9aa59b;text-decoration:none;font-size:12px;margin:7px 0}.footer a:hover{color:var(--green2)}
+.footer-bottom{margin-top:25px;padding-top:14px;border-top:1px solid #142516;display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;font-size:11px}
+.session-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}
+.session-card{border:1px solid #234b27;border-radius:14px;padding:14px;background:#0a0f0b}
+.session-meta{display:grid;grid-template-columns:1fr 1fr;gap:6px 12px;font-size:12px;margin-top:10px}
+.session-meta span{color:var(--muted)}
+.session-status{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:800;padding:4px 8px;border-radius:999px;background:#263126}
+.session-status.active{background:#123e1a;color:#8ee596}.session-status.inactive{background:#4b3d16;color:#ffd76a}.session-status.revoked{background:#4b1d1d;color:#ff9b9b}
+@media(max-width:800px){.footer-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:520px){.footer-grid{grid-template-columns:1fr}.session-meta{grid-template-columns:1fr}}
+
 @media(max-width:650px){
+  #userHeader{gap:6px}
+  #userNameDisplay{max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .app{width:94%;margin-top:10px}
   .brand h1{font-size:20px}
   .order-head{flex-direction:column}
@@ -231,7 +278,7 @@ th{color:#9bd49e}
       <h1>🌿 Green Store</h1>
       <small>Secure customer wallet & marketplace</small>
     </div>
-    <button class="btn danger small hidden" id="logoutBtn">Logout</button>
+    <div id="userHeader" class="hidden" style="display:flex;align-items:center;gap:9px;margin-left:auto"><span id="userNameDisplay" class="green" style="font-weight:800"></span><button class="btn danger small" id="logoutBtn">Logout</button></div>
   </div>
 
   <!-- AUTH -->
@@ -249,6 +296,22 @@ th{color:#9bd49e}
         <label>Password</label>
         <input id="loginPass" type="password" autocomplete="current-password">
         <button class="btn" style="width:100%;margin-top:12px" id="loginBtn">Login</button>
+
+        <div id="forgotPasswordBox" style="margin-top:12px;text-align:center">
+          <button class="btn secondary small" id="forgotPasswordBtn" type="button">Forgot password?</button>
+        </div>
+      </div>
+
+      <div id="resetPasswordForm" class="hidden">
+        <h2 style="margin-bottom:10px">Reset your password</h2>
+        <p class="muted" style="font-size:12px;line-height:1.5">Your recovery link is valid. Choose a new password below.</p>
+        <label>New password</label>
+        <input id="resetPass" type="password" autocomplete="new-password">
+        <label>Confirm new password</label>
+        <input id="resetPassConfirm" type="password" autocomplete="new-password">
+        <p class="muted" style="font-size:12px;margin-top:7px">Minimum 8 characters with uppercase, lowercase, number and symbol.</p>
+        <button class="btn" style="width:100%;margin-top:12px" id="resetPasswordBtn">Update password</button>
+        <button class="btn secondary" style="width:100%;margin-top:8px" id="backToLoginBtn">Back to login</button>
       </div>
 
       <div id="registerForm" class="hidden">
@@ -333,6 +396,7 @@ th{color:#9bd49e}
       <button class="btn secondary small" data-admin-tab="users">Users</button>
       <button class="btn secondary small" data-admin-tab="transactions">Transactions</button>
       <button class="btn secondary small" data-admin-tab="withdraw">Withdraw</button>
+      <button class="btn secondary small" data-admin-tab="sessions">Devices</button>
     </div>
 
     <div id="adminOrdersTab">
@@ -361,9 +425,10 @@ th{color:#9bd49e}
 
     <div id="adminWithdrawTab" class="hidden">
       <div class="card">
-        <h2>Admin withdrawal</h2>
-        <p class="muted" style="margin-top:5px">
-          Create a withdrawal record only after confirming the real-world payout.
+        <h2>Withdraw funds</h2>
+        <p class="muted" style="margin-top:5px;line-height:1.5">
+          Enter the payout details below. The withdrawal is recorded as pending
+          until the real-world payout is completed and confirmed.
         </p>
         <label>Amount (TSH)</label>
         <input id="withdrawAmount" type="number" min="1" step="1" placeholder="50000">
@@ -387,35 +452,47 @@ th{color:#9bd49e}
       </div>
     </div>
 
-  </section>
+  
+    <div id="adminSessionsTab" class="hidden">
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap">
+          <div><h2>Devices & Sessions</h2><p class="muted" style="font-size:12px;margin-top:5px">Monitor login devices and session status.</p></div>
+          <div style="display:flex;gap:7px;flex-wrap:wrap;align-items:center">
+            <button class="btn small" id="activeSessionsBtn">Active</button>
+            <button class="btn secondary small" id="archivedSessionsBtn">Archived</button>
+            <button class="btn secondary small" id="refreshSessionsBtn">↻ Refresh</button>
+          </div>
+        </div>
+        <div id="adminSessionsList" style="margin-top:14px"><p class="muted">Loading sessions...</p></div>
+      </div>
+    </div>
+</section>
+
+
+  <footer id="storeFooter" class="footer">
+    <div class="footer-grid">
+      <div><h3>WALAKAYA</h3><p>Secure digital commerce infrastructure powering Green Store.</p><p style="margin-top:9px">● Secure store environment</p></div>
+      <div><h4>PLATFORM</h4><a href="#customerProductsTab">Green Store</a><a href="#customerProductsTab">Wallet</a><a href="#customerOrdersTab">Orders</a><a href="#customerOrdersTab">Delivery</a><a href="#chatOverlay">Support</a></div>
+      <div><h4>SUPPORT</h4><a href="#customerTransactionsTab">Help Center</a><a href="mailto:support@walakaya.example">Contact Support</a><a href="mailto:security@walakaya.example">Report an Issue</a><a href="#store">Security</a></div>
+      <div><h4>LEGAL</h4><a href="#store">Privacy Policy</a><a href="#store">Terms & Conditions</a><a href="#store">Responsible Use</a><a href="#store">Security Notice</a></div>
+    </div>
+    <div class="footer-bottom"><span>© 2026 WALAKAYA. All rights reserved.</span><span>Green Store · Secure Digital Commerce</span></div>
+  </footer>
 
 </main>
 
 <!-- DEPOSIT MODAL -->
 <div id="depositModal" class="chat hidden">
-  <div class="card" style="width:min(430px,100%);margin:0">
-    <div style="display:flex;justify-content:space-between;align-items:center">
-      <h2>Deposit</h2>
-      <button class="btn secondary small" id="closeDeposit">X</button>
+  <div class="card" style="width:min(470px,100%);margin:0">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:10px"><div class="form-title"><div class="form-icon">💰</div><div><h2>Deposit Wallet</h2><div class="muted" style="font-size:11px">Create a payment verification request</div></div></div><button class="btn secondary small" id="closeDeposit">✕</button></div>
+    <div class="form-shell" style="margin-top:14px">
+      <p class="form-help">Enter the amount paid and payment method. The wallet is credited only after the payment is verified.</p>
+      <div class="field"><label for="depositAmount">Amount</label><div class="input-wrap"><input id="depositAmount" type="number" min="100" step="1" inputmode="numeric" placeholder="10000"><span class="currency-tag">TSH</span></div></div>
+      <div class="field"><label for="depositMethod">Payment method</label><select id="depositMethod"><option value="mpesa">M-Pesa</option><option value="airtel_money">Airtel Money</option><option value="mixx">Mixx by Yas</option><option value="card">Card</option><option value="bank">Bank</option><option value="other">Other</option></select></div>
+      <div class="field"><label for="depositReference">Payment reference <span class="muted">(optional)</span></label><input id="depositReference" maxlength="120" placeholder="Transaction ID / reference"></div>
+      <div class="form-note">🔒 Pending deposit requests never increase the wallet balance.</div>
+      <div class="form-actions"><button class="btn" style="flex:1" id="createDepositBtn">Submit Deposit Request</button><button class="btn secondary" id="cancelDepositBtn">Cancel</button></div>
     </div>
-    <p class="muted" style="margin-top:7px">
-      This creates a pending deposit request. The payment provider/webhook must
-      verify the real payment before the wallet is credited.
-    </p>
-    <label>Amount (TSH)</label>
-    <input id="depositAmount" type="number" min="1" step="1" placeholder="10000">
-    <label>Payment method</label>
-    <select id="depositMethod">
-      <option value="mpesa">M-Pesa</option>
-      <option value="airtel_money">Airtel Money</option>
-      <option value="mixx">Mixx by Yas</option>
-      <option value="card">Card</option>
-      <option value="bank">Bank</option>
-      <option value="other">Other</option>
-    </select>
-    <label>Provider reference (optional)</label>
-    <input id="depositReference" placeholder="Leave empty if not available">
-    <button class="btn" style="width:100%;margin-top:12px" id="createDepositBtn">Create Deposit</button>
   </div>
 </div>
 
@@ -428,6 +505,27 @@ th{color:#9bd49e}
     </div>
 
     <p id="selectedProductText" class="green" style="margin-top:8px;font-weight:800"></p>
+
+    <div class="payment-method-box">
+      <div class="payment-method-title">Payment method</div>
+      <div class="payment-methods">
+        <div class="payment-option">
+          <input id="paymentWallet" type="radio" name="orderPaymentMethod" value="wallet" checked>
+          <label for="paymentWallet">
+            <span class="payment-icon">💳</span>
+            <span class="payment-copy"><strong>Buy with Wallet</strong><span>Pay instantly from wallet</span></span>
+          </label>
+        </div>
+        <div class="payment-option">
+          <input id="paymentInHand" type="radio" name="orderPaymentMethod" value="in_hand">
+          <label for="paymentInHand">
+            <span class="payment-icon">🤝</span>
+            <span class="payment-copy"><strong>Pay in Hand</strong><span>Pay when order is delivered</span></span>
+          </label>
+        </div>
+      </div>
+      <div id="paymentMethodNote" class="payment-badge">💳 Wallet payment selected</div>
+    </div>
 
     <label>Delivery address / notes</label>
     <textarea id="deliveryAddress" rows="2" placeholder="House, street, area, landmark..."></textarea>
@@ -469,10 +567,10 @@ th{color:#9bd49e}
       <div class="row" style="align-items:center">
         <input id="chatInput" placeholder="Andika ujumbe..." style="flex:1">
         <input id="imagePicker" type="file" accept="image/jpeg,image/png,image/webp,image/gif" multiple class="hidden">
-        <button class="btn secondary" id="pickImagesBtn" title="Maximum 3 images">📎</button>
+        <button class="btn secondary" id="pickImagesBtn" title="Maximum 3 images · 20MB each">📎</button>
         <button class="btn" id="sendMessageBtn">➤</button>
       </div>
-      <div class="muted" style="font-size:11px;margin-top:5px">Maximum 3 images per message.</div>
+      <div class="muted" style="font-size:11px;margin-top:5px">Maximum 3 images per message · 20MB maximum per image.</div>
     </div>
   </div>
 </div>
@@ -486,21 +584,52 @@ th{color:#9bd49e}
    NEVER put service_role or RESEND API keys here.
    ============================================================ */
 
+
 const SUPABASE_URL = "https://gzcxheoeouwuoybyowvy.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd6Y3hoZW9lb3V3dW95Ynlvd3Z5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY1ODkyMjAsImV4cCI6MjEwMjE2NTIyMH0.8gjxL7ig-WfOoc0VQC3EIDQx6NDZPBfR0I7gd82gA2w";
 
+
 const CHAT_BUCKET = "chat-images";
 const ACCESS_CODE = 0.7734;
+const MAX_CHAT_IMAGE_SIZE = 20 * 1024 * 1024;
+
+function getPasswordResetRedirect(){
+  // file:// has no valid web origin for a recovery redirect; Supabase will use
+  // the configured Site URL / Redirect URL in that case.
+  if(location.protocol === "http:" || location.protocol === "https:")
+    return location.origin + location.pathname;
+  return undefined;
+}
+
+function isPasswordRecovery(){
+  return /type=recovery/i.test(window.location.hash || "");
+}
+
+function showResetPassword(){
+  $("loginForm").classList.add("hidden");
+  $("registerForm").classList.add("hidden");
+  $("forgotPasswordBox").classList.add("hidden");
+  $("resetPasswordForm").classList.remove("hidden");
+}
+
+function showLoginAuth(){
+  $("resetPasswordForm").classList.add("hidden");
+  $("forgotPasswordBox").classList.remove("hidden");
+  $("loginForm").classList.remove("hidden");
+}
+
 
 let sb = null;
 let currentUser = null;
 let currentProfile = null;
+let afterLoginInProgress = false;
 
 let map = null;
 let marker = null;
 let selectedProduct = null;
 let selectedLat = null;
 let selectedLng = null;
+let selectedPaymentMethod = "wallet";
 
 let activeOrderId = null;
 let activeChatChannel = null;
@@ -509,6 +638,10 @@ let userOrdersChannel = null;
 
 let pendingImages = [];
 let adminOrderFilter = "pending";
+let adminUnreadRefreshTimer = null;
+let adminUnreadRefreshBusy = false;
+let adminLiveRefreshTimer = null;
+let adminLiveRefreshBusy = false;
 
 /* ---------- Utilities ---------- */
 
@@ -621,12 +754,19 @@ async function init(){
   sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
 
   const {data:{session}}=await sb.auth.getSession();
-  if(session?.user){
+  if(isPasswordRecovery()){
+    showResetPassword();
+  }else if(session?.user){
     currentUser=session.user;
     await afterLogin();
   }
 
   sb.auth.onAuthStateChange(async (_event,session)=>{
+    if(_event === "PASSWORD_RECOVERY"){
+      currentUser=session?.user || null;
+      showResetPassword();
+      return;
+    }
     if(session?.user && !currentUser){
       currentUser=session.user;
       await afterLogin();
@@ -652,6 +792,40 @@ $("showRegister").onclick=()=>{
 
 $("loginBtn").onclick=login;
 $("registerBtn").onclick=register;
+$("forgotPasswordBtn").onclick=sendPasswordReset;
+$("resetPasswordBtn").onclick=updatePassword;
+$("backToLoginBtn").onclick=showLoginAuth;
+
+async function sendPasswordReset(){
+  const email=$("loginEmail").value.trim();
+  if(!email) return toast("Enter your account email first.",true);
+  $("forgotPasswordBtn").disabled=true;
+  const redirectTo=getPasswordResetRedirect();
+  const options=redirectTo ? {redirectTo} : undefined;
+  const {error}=await sb.auth.resetPasswordForEmail(email,options);
+  $("forgotPasswordBtn").disabled=false;
+  if(error) return toast(error.message,true);
+  toast("Password reset email sent. Open the link from your email to choose a new password.");
+}
+
+async function updatePassword(){
+  const pass=$("resetPass").value;
+  const confirmPass=$("resetPassConfirm").value;
+  if(!passwordOK(pass)) return toast("Password: 8+ chars, uppercase, lowercase, number and symbol.",true);
+  if(pass!==confirmPass) return toast("Passwords do not match.",true);
+  $("resetPasswordBtn").disabled=true;
+  $("resetPasswordBtn").textContent="Updating...";
+  const {error}=await sb.auth.updateUser({password:pass});
+  $("resetPasswordBtn").disabled=false;
+  $("resetPasswordBtn").textContent="Update password";
+  if(error) return toast(error.message,true);
+  $("resetPass").value="";
+  $("resetPassConfirm").value="";
+  showLoginAuth();
+  try{await sb.auth.signOut();}catch(e){}
+  toast("Password updated successfully. You can now log in.");
+}
+
 
 async function login(){
   const email=$("loginEmail").value.trim();
@@ -695,11 +869,14 @@ async function register(){
 }
 
 async function afterLogin(){
+  if(afterLoginInProgress)return;
+  afterLoginInProgress=true;
   try{
     await getProfile();
 
     $("authSection").classList.add("hidden");
-    $("logoutBtn").classList.remove("hidden");
+    $("userHeader").classList.remove("hidden");
+    $("userNameDisplay").textContent=currentProfile.full_name || currentUser.email || "User";
 
     if(currentProfile.is_admin){
       $("adminSection").classList.remove("hidden");
@@ -710,16 +887,27 @@ async function afterLogin(){
       $("adminSection").classList.add("hidden");
       await initCustomer();
     }
+    await setupSessionMonitor();
   }catch(error){
     console.error(error);
     toast("Could not load account profile: "+error.message,true);
+  }finally{
+    afterLoginInProgress=false;
   }
 }
 
 $("logoutBtn").onclick=async()=>{
+  try{
+    if(currentSessionId && sb) await sb.rpc("logout_login_session",{p_session_id:currentSessionId});
+  }catch(e){console.warn("Session logout:",e.message);}
   if(activeChatChannel) await sb.removeChannel(activeChatChannel);
   if(adminOrdersChannel) await sb.removeChannel(adminOrdersChannel);
   if(userOrdersChannel) await sb.removeChannel(userOrdersChannel);
+  if(sessionChannel) await sb.removeChannel(sessionChannel);
+  clearInterval(window.__sessionHeartbeat);
+  stopAdminUnreadFallback();
+  stopAdminLiveRefresh();
+  clearStoredLoginSession();
   await sb.auth.signOut();
   location.reload();
 };
@@ -789,6 +977,10 @@ async function openOrderModal(productId){
   selectedProduct=data;
   selectedLat=null;
   selectedLng=null;
+  selectedPaymentMethod="wallet";
+  $("paymentWallet").checked=true;
+  $("paymentInHand").checked=false;
+  updatePaymentMethodUI();
   $("deliveryAddress").value="";
   $("coordsText").textContent="No location selected.";
   $("selectedProductText").textContent=`${data.name} — ${money(data.price_tzs)}`;
@@ -848,6 +1040,23 @@ $("clearLocationBtn").onclick=()=>{
 
 $("closeOrder").onclick=()=>$("orderModal").classList.add("hidden");
 
+function updatePaymentMethodUI(){
+  selectedPaymentMethod=document.querySelector('input[name="orderPaymentMethod"]:checked')?.value || "wallet";
+  const note=$("paymentMethodNote");
+  const button=$("confirmOrderBtn");
+  if(selectedPaymentMethod==="in_hand"){
+    note.textContent="🤝 Pay in Hand selected · wallet will not be charged";
+    button.textContent="Place Order · Pay in Hand";
+  }else{
+    note.textContent="💳 Wallet payment selected";
+    button.textContent="Buy with Wallet";
+  }
+}
+
+$("paymentWallet").onchange=updatePaymentMethodUI;
+$("paymentInHand").onchange=updatePaymentMethodUI;
+updatePaymentMethodUI();
+
 $("confirmOrderBtn").onclick=async()=>{
   if(!selectedProduct) return;
 
@@ -862,7 +1071,13 @@ $("confirmOrderBtn").onclick=async()=>{
     p_delivery_address:address||null,
     p_lat:selectedLat,
     p_lng:selectedLng,
-    p_place_name:null
+    p_place_name:null,
+    p_payment_method:selectedPaymentMethod,
+    p_device_info:deviceName(),
+    p_browser:browserName(),
+    p_operating_system:osName(),
+    p_ip_address:null,
+    p_user_agent:navigator.userAgent
   });
 
   $("confirmOrderBtn").disabled=false;
@@ -883,11 +1098,12 @@ async function loadMyOrders(){
 
   const {data,error}=await sb.from("orders")
     .select(`
-      id,status,price_tzs,delivery_address,delivery_lat,delivery_lng,
+      id,status,price_tzs,payment_method,delivery_address,delivery_lat,delivery_lng,
       delivery_place_name,created_at,updated_at,
       products(name,image_url)
     `)
     .eq("user_id",currentUser.id)
+    .eq("status","pending")
     .order("created_at",{ascending:false});
 
   if(error){
@@ -921,6 +1137,7 @@ async function loadMyOrders(){
           <span class="status ${esc(o.status)}">${esc(o.status)}</span>
         </div>
         <div style="margin-top:9px">${money(o.price_tzs)}</div>
+        <div class="payment-badge">${o.payment_method==="in_hand" ? "🤝 PAY IN HAND" : "💳 WALLET"}</div>
         <div class="muted" style="margin-top:7px">📍 ${esc(o.delivery_address||"No text address")}</div>
         <div style="margin-top:8px">${location}</div>
 
@@ -988,9 +1205,12 @@ $("createDepositBtn").onclick=async()=>{
   const ref=$("depositReference").value.trim()||null;
 
   if(!Number.isInteger(amount) || amount<=0)
-    return toast("Enter a valid TSH amount.",true);
+    return toast("Enter a valid whole TSH amount.",true);
+  if(amount<100)
+    return toast("Minimum deposit is TSH 100.",true);
 
   $("createDepositBtn").disabled=true;
+  $("createDepositBtn").textContent="Submitting...";
 
   const {data,error}=await sb.rpc("create_deposit",{
     p_amount_tzs:amount,
@@ -999,6 +1219,7 @@ $("createDepositBtn").onclick=async()=>{
   });
 
   $("createDepositBtn").disabled=false;
+  $("createDepositBtn").textContent="Submit Deposit Request";
 
   if(error){
     toast(error.message,true);
@@ -1007,20 +1228,19 @@ $("createDepositBtn").onclick=async()=>{
 
   $("depositModal").classList.add("hidden");
   toast("Deposit request created. Wallet will change only after verified payment.");
+  await loadMyTransactions();
 };
 
 /* ---------- Realtime customer ---------- */
 
 function setupUserRealtime(){
   if(userOrdersChannel) sb.removeChannel(userOrdersChannel);
-
   userOrdersChannel=sb.channel(`user_system_${currentUser.id}`)
-    .on("postgres_changes",
-      {event:"*",schema:"public",table:"orders",filter:`user_id=eq.${currentUser.id}`},
-      async()=>await loadMyOrders()
-    )
-    .on("postgres_changes",
-      {event:"INSERT",schema:"public",table:"messages"},
+    .on("postgres_changes",{event:"*",schema:"public",table:"orders",filter:`user_id=eq.${currentUser.id}`},
+      async()=>await loadMyOrders())
+    .on("postgres_changes",{event:"*",schema:"public",table:"wallet_transactions",filter:`user_id=eq.${currentUser.id}`},
+      async()=>await Promise.all([loadWallet(),loadMyTransactions()]))
+    .on("postgres_changes",{event:"INSERT",schema:"public",table:"messages"},
       async payload=>{
         if(activeOrderId===payload.new.order_id) return;
         await loadMyOrders();
@@ -1035,19 +1255,150 @@ async function getUnreadCounts(orderIds){
   const result={};
   if(!orderIds?.length) return result;
 
+  /*
+   * Only PENDING orders can have active unread chat messages.
+   * Once an order is delivered/closed, its unread messages must
+   * never contribute to the admin/customer unread badge.
+   */
+  const {data:orders,error:ordersError}=await sb
+    .from("orders")
+    .select("id,status")
+    .in("id",orderIds)
+    .eq("status","pending");
+
+  if(ordersError) return result;
+
+  const activeOrderIds=(orders||[]).map(o=>o.id);
+  if(!activeOrderIds.length) return result;
+
   const {data,error}=await sb.from("messages")
     .select("order_id,sender_id,read_at")
-    .in("order_id",orderIds)
+    .in("order_id",activeOrderIds)
     .is("read_at",null);
 
   if(error) return result;
 
   (data||[]).forEach(m=>{
-    if(m.sender_id!==currentUser.id)
+    if(m.sender_id!==currentUser.id){
       result[m.order_id]=(result[m.order_id]||0)+1;
+    }
   });
 
   return result;
+}
+/*
+ * ADMIN UNREAD STATE
+ * Realtime is the primary path. A lightweight fallback refresh keeps badges
+ * correct even if a browser misses a realtime INSERT while reconnecting.
+ */
+async function refreshAdminUnreadState(renderOrders=false){
+  if(!currentProfile?.is_admin || !sb || !currentUser || adminUnreadRefreshBusy) return;
+
+  adminUnreadRefreshBusy=true;
+  try{
+    const {data:orders,error}=await sb
+      .from("orders")
+      .select("id,status")
+      .eq("status","pending");
+
+    if(error) throw error;
+
+    const orderIds=(orders||[]).map(o=>o.id);
+    const unreadMap=await getUnreadCounts(orderIds);
+    const total=Object.values(unreadMap).reduce((a,b)=>a+b,0);
+
+    $("adminUnreadTotal").textContent=total;
+
+    document.querySelectorAll("[data-admin-order-id]").forEach(card=>{
+      const orderId=card.getAttribute("data-admin-order-id");
+      const unread=unreadMap[orderId]||0;
+
+      const badge=card.querySelector(".admin-new-message-badge");
+      if(unread){
+        if(badge){
+          badge.textContent=`🔴 NEW MESSAGE · ${unread}`;
+        }else{
+          const head=card.querySelector(".order-head");
+          if(head){
+            const b=document.createElement("span");
+            b.className="admin-new-message-badge";
+            b.textContent=`🔴 NEW MESSAGE · ${unread}`;
+            head.appendChild(b);
+          }
+        }
+      }else if(badge){
+        badge.remove();
+      }
+
+      const chatBtn=card.querySelector("[data-admin-chat-button]");
+      if(chatBtn){
+        chatBtn.innerHTML=`💬 Chat${unread ? ` <span class="badge">${unread}</span>` : ""}`;
+      }
+    });
+
+    if(renderOrders && adminOrderFilter==="pending"){
+      await loadAdminOrders("pending");
+    }
+  }catch(e){
+    console.warn("Admin unread refresh:",e.message);
+  }finally{
+    adminUnreadRefreshBusy=false;
+  }
+}
+
+function startAdminUnreadFallback(){
+  clearInterval(adminUnreadRefreshTimer);
+  adminUnreadRefreshTimer=setInterval(()=>{
+    if(document.visibilityState==="visible") refreshAdminUnreadState(false);
+  },3000);
+}
+
+function stopAdminUnreadFallback(){
+  clearInterval(adminUnreadRefreshTimer);
+  adminUnreadRefreshTimer=null;
+}
+
+/*
+ * ADMIN LIVE DATA REFRESH
+ *
+ * Realtime remains the primary path through setupAdminRealtime().
+ * This independent lightweight refresh is intentionally kept at the admin
+ * dashboard level instead of depending on the currently selected tab.
+ * That means orders/users/badges stay current even while the admin is on
+ * Sessions, Transactions, Withdraw, or another admin tab.
+ * No SQL/schema change is required.
+ */
+async function refreshAdminLiveData(){
+  if(!currentProfile?.is_admin || !sb || !currentUser || adminLiveRefreshBusy) return;
+
+  adminLiveRefreshBusy=true;
+  try{
+    await Promise.all([
+      loadAdminStats(),
+      loadAdminOrders(adminOrderFilter),
+      loadAdminUsers(),
+      refreshAdminUnreadState(false)
+    ]);
+  }catch(e){
+    console.warn("Admin live refresh:",e.message);
+  }finally{
+    adminLiveRefreshBusy=false;
+  }
+}
+
+function startAdminLiveRefresh(){
+  clearInterval(adminLiveRefreshTimer);
+  adminLiveRefreshTimer=setInterval(()=>{
+    if(document.visibilityState==="visible" && currentProfile?.is_admin){
+      refreshAdminLiveData();
+    }
+  },3000);
+}
+
+function stopAdminLiveRefresh(){
+  clearInterval(adminLiveRefreshTimer);
+  adminLiveRefreshTimer=null;
+  adminLiveRefreshBusy=false;
 }
 
 /* ---------- Admin ---------- */
@@ -1060,26 +1411,35 @@ async function initAdmin(){
     loadAdminTransactions(),
     loadWithdrawals()
   ]);
-  setupAdminRealtime();
+  await setupAdminRealtime();
+  startAdminUnreadFallback();
+  startAdminLiveRefresh();
+  await refreshAdminUnreadState(false);
 }
 
 async function loadAdminStats(){
-  const [{data:users},{data:orders},{data:tx}]=await Promise.all([
+  const [
+    {count:userCount,error:userError},
+    {data:orders,error:ordersError},
+    {data:tx,error:txError}
+  ]=await Promise.all([
     sb.from("profiles").select("id",{count:"exact",head:true}),
-    sb.from("orders").select("id,status",{count:"exact"}),
-    sb.from("wallet_transactions").select("type,amount_tzs,status")
-      .eq("status","completed")
+    sb.from("orders").select("id,status"),
+    sb.from("wallet_transactions").select("type,amount_tzs,status").eq("status","completed")
   ]);
 
-  $("totalUsers").textContent=users?.length ?? 0;
+  if(userError) console.error("Users count error:",userError);
+  if(ordersError) console.error("Orders stats error:",ordersError);
+  if(txError) console.error("Transactions stats error:",txError);
+
+  $("totalUsers").textContent=Number(userCount||0);
   $("pendingOrders").textContent=(orders||[]).filter(o=>o.status==="pending").length;
 
   let platform=0;
   (tx||[]).forEach(t=>{
-    if(["deposit","refund","adjustment"].includes(t.type)) platform+=Number(t.amount_tzs);
-    if(["purchase","withdrawal"].includes(t.type)) platform-=Number(t.amount_tzs);
+    if(["deposit","refund","adjustment"].includes(t.type)) platform+=Number(t.amount_tzs||0);
+    if(["purchase","withdrawal"].includes(t.type)) platform-=Number(t.amount_tzs||0);
   });
-
   $("platformBalance").textContent=money(platform);
 
   const orderIds=(orders||[]).map(o=>o.id);
@@ -1095,7 +1455,7 @@ async function loadAdminOrders(status){
 
   const {data,error}=await sb.from("orders")
     .select(`
-      id,user_id,status,price_tzs,delivery_address,delivery_lat,delivery_lng,
+      id,user_id,status,price_tzs,payment_method,delivery_address,delivery_lat,delivery_lng,
       delivery_place_name,created_at,updated_at,
       profiles(full_name,email),
       products(name)
@@ -1122,7 +1482,7 @@ async function loadAdminOrders(status){
       : "";
 
     return `
-      <div class="order">
+      <div class="order" data-admin-order-id="${esc(o.id)}">
         <div class="order-head">
           <div>
             <strong>${esc(o.products?.name||"Product")}</strong>
@@ -1131,16 +1491,20 @@ async function loadAdminOrders(status){
           </div>
           <div style="text-align:right">
             <div class="green">${money(o.price_tzs)}</div>
+            <div class="payment-badge">${o.payment_method==="in_hand" ? "🤝 PAY IN HAND" : "💳 WALLET"}</div>
             <span class="status ${esc(o.status)}">${esc(o.status)}</span>
           </div>
         </div>
 
+        ${unread ? `<div class="admin-new-message-badge">🔴 NEW MESSAGE · ${unread}</div>` : ""}
         <div class="muted" style="margin-top:8px">📍 ${esc(o.delivery_address||"No text address")}</div>
 
         <div style="display:flex;gap:7px;flex-wrap:wrap;margin-top:10px">
-          <button class="btn small" onclick="openChat('${o.id}')">
-            💬 Chat ${unread ? `<span class="badge">${unread}</span>` : ""}
-          </button>
+          ${status==="pending" ? `
+            <button class="btn small" data-admin-chat-button onclick="openChat('${o.id}')">
+              💬 Chat ${unread ? `<span class="badge">${unread}</span>` : ""}
+            </button>
+          ` : ""}
           ${mapBtn}
           ${status==="pending" ? `
             <button class="btn blue small" onclick="deliverOrder('${o.id}')">Verify & Deliver</button>
@@ -1160,7 +1524,8 @@ async function deliverOrder(orderId){
   const {error}=await sb.rpc("mark_order_delivered",{p_order_id:orderId});
   if(error) return toast(error.message,true);
 
-  toast("Order marked as delivered.");
+  if(activeOrderId===orderId) closeChat();
+  toast("Order delivered and conversation closed.");
   await Promise.all([loadAdminOrders(adminOrderFilter),loadAdminStats()]);
 }
 
@@ -1236,36 +1601,132 @@ async function loadAdminTransactions(){
 }
 
 async function setupAdminRealtime(){
-  if(adminOrdersChannel) sb.removeChannel(adminOrdersChannel);
+  if(!sb||!currentUser||!currentProfile?.is_admin)return;
 
-  adminOrdersChannel=sb.channel("admin_realtime")
-    .on("postgres_changes",
-      {event:"*",schema:"public",table:"orders"},
-      async()=>{
+  if(adminOrdersChannel){
+    try{await sb.removeChannel(adminOrdersChannel);}catch(e){}
+    adminOrdersChannel=null;
+  }
+
+  adminOrdersChannel=sb.channel(`admin_realtime_${currentUser.id}`);
+
+  /* ---------- ORDERS: new order + status/update ---------- */
+  adminOrdersChannel.on(
+    "postgres_changes",
+    {event:"*",schema:"public",table:"orders"},
+    async payload=>{
+      try{
         await Promise.all([
+          loadAdminStats(),
           loadAdminOrders(adminOrderFilter),
-          loadAdminStats()
+          refreshAdminUnreadState(false)
         ]);
-      })
-    .on("postgres_changes",
-      {event:"INSERT",schema:"public",table:"messages"},
-      async payload=>{
-        if(activeOrderId===payload.new.order_id) return;
-        await Promise.all([
-          loadAdminOrders(adminOrderFilter),
-          loadAdminStats()
-        ]);
+
+        if(payload?.eventType==="INSERT")
+          toast("🛒 New order received.");
+      }catch(e){
+        console.warn("Admin orders realtime:",e.message);
+      }
+    }
+  );
+
+  /* ---------- MESSAGES: unread badge/count ---------- */
+  adminOrdersChannel.on(
+    "postgres_changes",
+    {event:"INSERT",schema:"public",table:"messages"},
+    async payload=>{
+      try{
+        const orderId=payload?.new?.order_id;
+        if(!orderId)return;
+
+        /* The open chat channel already renders the message itself. */
+        if(activeOrderId===orderId){
+          await refreshAdminUnreadState(false);
+          return;
+        }
+
+        await refreshAdminUnreadState(false);
+
+        /* Re-render pending cards so a newly received message gets its
+           badge immediately, even when the admin is on another admin tab. */
+        if(adminOrderFilter==="pending")
+          await loadAdminOrders("pending");
+
+        await loadAdminStats();
         toast("🔴 New customer message.");
-      })
-    .on("postgres_changes",
-      {event:"*",schema:"public",table:"wallet_transactions"},
-      async()=>{
+      }catch(e){
+        console.warn("Admin messages realtime:",e.message);
+      }
+    }
+  );
+
+  /* ---------- WALLET TRANSACTIONS ---------- */
+  adminOrdersChannel.on(
+    "postgres_changes",
+    {event:"*",schema:"public",table:"wallet_transactions"},
+    async()=>{
+      try{
+        await Promise.all([loadAdminStats(),loadAdminTransactions()]);
+      }catch(e){
+        console.warn("Admin transactions realtime:",e.message);
+      }
+    }
+  );
+
+  /* ---------- PROFILES: new registration + user count/list ---------- */
+  adminOrdersChannel.on(
+    "postgres_changes",
+    {event:"*",schema:"public",table:"profiles"},
+    async payload=>{
+      try{
+        await Promise.all([loadAdminStats(),loadAdminUsers()]);
+
+        if(payload?.eventType==="INSERT")
+          toast("👤 New user registered.");
+      }catch(e){
+        console.warn("Admin profiles realtime:",e.message);
+      }
+    }
+  );
+
+  /* ---------- WITHDRAWALS ---------- */
+  adminOrdersChannel.on(
+    "postgres_changes",
+    {event:"*",schema:"public",table:"withdrawals"},
+    async()=>{
+      try{
         await Promise.all([
+          loadWithdrawals(),
           loadAdminStats(),
           loadAdminTransactions()
         ]);
-      })
-    .subscribe();
+      }catch(e){
+        console.warn("Admin withdrawals realtime:",e.message);
+      }
+    }
+  );
+
+  /* ---------- PRODUCTS ---------- */
+  adminOrdersChannel.on(
+    "postgres_changes",
+    {event:"*",schema:"public",table:"products"},
+    async()=>{
+      try{await loadProducts();}
+      catch(e){console.warn("Admin products realtime:",e.message);}
+    }
+  );
+
+  /* Subscribe only after every listener has been attached. */
+  adminOrdersChannel.subscribe(status=>{
+    if(status==="SUBSCRIBED")
+      console.log("Admin realtime connected.");
+    else if(status==="CHANNEL_ERROR")
+      console.warn("Admin realtime channel error.");
+    else if(status==="TIMED_OUT")
+      console.warn("Admin realtime timed out.");
+    else if(status==="CLOSED")
+      console.warn("Admin realtime channel closed.");
+  });
 }
 
 /* ---------- Withdrawals ---------- */
@@ -1283,6 +1744,7 @@ $("withdrawBtn").onclick=async()=>{
     return toast("Enter withdrawal destination.",true);
 
   $("withdrawBtn").disabled=true;
+  $("withdrawBtn").textContent="Creating...";
 
   const {data,error}=await sb.rpc("create_withdrawal",{
     p_amount_tzs:amount,
@@ -1292,6 +1754,7 @@ $("withdrawBtn").onclick=async()=>{
   });
 
   $("withdrawBtn").disabled=false;
+  $("withdrawBtn").textContent="Create Withdrawal Record";
 
   if(error) return toast(error.message,true);
 
@@ -1364,8 +1827,8 @@ $("imagePicker").addEventListener("change",()=>{
       $("imagePicker").value="";
       return;
     }
-    if(file.size>5*1024*1024){
-      toast(`${file.name} is larger than 5MB.`,true);
+    if(file.size>MAX_CHAT_IMAGE_SIZE){
+      toast(`${file.name} is larger than 20MB.`,true);
       $("imagePicker").value="";
       return;
     }
@@ -1419,6 +1882,17 @@ async function openChat(orderId){
         if(payload.new.sender_id!==currentUser.id){
           await appendMessage(payload.new);
           await markOrderRead(orderId);
+        }
+      })
+    .on("postgres_changes",
+      {event:"UPDATE",schema:"public",table:"orders",filter:`id=eq.${orderId}`},
+      async payload=>{
+        const updated=payload.new||{};
+        if(updated.id===orderId && updated.status!=="pending"){
+          closeChat();
+          toast("Order delivered. This conversation is now closed.");
+          if(currentProfile?.is_admin) await Promise.all([loadAdminOrders(adminOrderFilter),loadAdminStats()]);
+          else await loadMyOrders();
         }
       })
     .subscribe();
@@ -1498,7 +1972,11 @@ async function markOrderRead(orderId){
   if(error) console.error("mark read:",error.message);
 
   if(currentProfile?.is_admin){
-    await Promise.all([loadAdminOrders(adminOrderFilter),loadAdminStats()]);
+    await Promise.all([
+      loadAdminOrders(adminOrderFilter),
+      loadAdminStats(),
+      refreshAdminUnreadState(false)
+    ]);
   }else{
     await loadMyOrders();
   }
@@ -1515,6 +1993,14 @@ $("chatInput").addEventListener("keydown",e=>{
 
 async function sendMessage(){
   if(!activeOrderId) return;
+
+  const {data:activeOrder,error:activeOrderError}=await sb.from("orders")
+    .select("status").eq("id",activeOrderId).single();
+  if(activeOrderError) return toast(activeOrderError.message,true);
+  if(activeOrder?.status!=="pending"){
+    closeChat();
+    return toast("This order is closed. The conversation can no longer receive messages.",true);
+  }
 
   const text=$("chatInput").value.trim();
 
@@ -1596,6 +2082,220 @@ function closeChat(){
   }
 }
 
+/* ---------- ONE DEVICE / SESSION MONITOR ---------- */
+let sessionChannel=null;
+let adminSessionView="active";
+let currentSessionId=localStorage.getItem("green_store_session_id")||null;
+let currentSessionKey=localStorage.getItem("green_store_session_key")||null;
+let currentDeviceId=localStorage.getItem("green_store_device_id");
+if(!currentDeviceId){
+  currentDeviceId=(crypto.randomUUID?crypto.randomUUID():`${Date.now()}-${Math.random().toString(36).slice(2)}`);
+  localStorage.setItem("green_store_device_id",currentDeviceId);
+}
+function browserName(){const u=navigator.userAgent;return /Edg\//.test(u)?"Edge":/Chrome\//.test(u)?"Chrome":/Firefox\//.test(u)?"Firefox":/Safari\//.test(u)?"Safari":"Browser";}
+function osName(){const u=navigator.userAgent;return /Windows/i.test(u)?"Windows":/Android/i.test(u)?"Android":/iPhone|iPad|iPod/i.test(u)?"iOS":/Mac OS X/i.test(u)?"macOS":/Linux/i.test(u)?"Linux":"Unknown";}
+function deviceName(){return `${browserName()} on ${osName()}`;}
+function clearStoredLoginSession(){currentSessionId=null;currentSessionKey=null;localStorage.removeItem("green_store_session_id");localStorage.removeItem("green_store_session_key");}
+
+async function registerSession(forceNew=false){
+  if(!sb||!currentUser)return false;
+
+  /*
+     IMPORTANT: create_login_session() must only run when this browser
+     does not already have a valid session. Calling it every time the
+     monitor is initialized creates duplicate device sessions.
+  */
+  if(!forceNew && currentSessionId){
+    try{
+      const {data,error}=await sb.rpc("check_login_session",{p_session_id:currentSessionId});
+      if(!error && data?.valid){
+        return true;
+      }
+    }catch(e){
+      console.warn("Existing session validation:",e.message);
+    }
+
+    /* A stored session that is no longer valid must not be reused. */
+    clearStoredLoginSession();
+  }
+
+  try{
+    const {data,error}=await sb.rpc("create_login_session",{
+      p_device_id:currentDeviceId,
+      p_device_name:deviceName(),
+      p_browser:browserName(),
+      p_operating_system:osName(),
+      p_user_agent:navigator.userAgent
+    });
+    if(error) throw error;
+    currentSessionId=data?.session_id||null;
+    currentSessionKey=data?.session_key||null;
+    if(currentSessionId)localStorage.setItem("green_store_session_id",currentSessionId);
+    if(currentSessionKey)localStorage.setItem("green_store_session_key",currentSessionKey);
+    return !!currentSessionId;
+  }catch(e){
+    console.warn("Session registration failed:",e.message);
+    toast("Could not start secure login session: "+e.message,true);
+    return false;
+  }
+}
+
+async function heartbeatSession(){
+  if(!sb||!currentUser||!currentSessionId)return false;
+  try{
+    const {data,error}=await sb.rpc("session_heartbeat",{p_session_id:currentSessionId});
+    if(error) throw error;
+    if(data!==true){
+      await handleSessionRevoked("Your session is no longer active.");
+      return false;
+    }
+    return true;
+  }catch(e){console.warn("Session heartbeat:",e.message);return false;}
+}
+
+async function validateSession(){
+  if(!sb||!currentUser)return true;
+  if(!currentSessionId)return false;
+  try{
+    const {data,error}=await sb.rpc("check_login_session",{p_session_id:currentSessionId});
+    if(error) throw error;
+    if(!data?.valid){
+      await handleSessionRevoked("This session was revoked or is no longer active.");
+      return false;
+    }
+    return true;
+  }catch(e){
+    console.warn("Session validation:",e.message);
+    return false;
+  }
+}
+
+async function handleSessionRevoked(message){
+  toast(message||"Your session was revoked. Logging out.",true);
+  clearStoredLoginSession();
+  try{await sb.auth.signOut();}catch(e){}
+  setTimeout(()=>location.reload(),250);
+}
+
+async function loadAdminSessions(){
+  const list=$("adminSessionsList");if(!list||!sb||!currentProfile?.is_admin)return;
+  list.innerHTML='<p class="muted">Loading sessions...</p>';
+  try{
+    /* user_sessions references auth.users, not profiles. Therefore do NOT use profiles(...) here. */
+    const {data:sessions,error}=await sb.from("user_sessions")
+      .select("id,user_id,session_key,device_id,device_name,browser,operating_system,ip_address,user_agent,is_active,revoked,login_at,last_seen_at,logout_at,revoked_at,created_at")
+      .order("last_seen_at",{ascending:false}).limit(500);
+    if(error)throw error;
+    if(!sessions?.length){list.innerHTML='<p class="muted">No sessions recorded.</p>';return;}
+
+    const userIds=[...new Set(sessions.map(x=>x.user_id).filter(Boolean))];
+    let profilesById={};
+    if(userIds.length){
+      const {data:profiles,error:profileError}=await sb.from("profiles").select("id,full_name,email,is_admin").in("id",userIds);
+      if(!profileError)(profiles||[]).forEach(p=>profilesById[p.id]=p);
+    }
+
+    const filtered=sessions.filter(x=>{
+      const revoked=!!x.revoked;
+      const active=x.is_active===true&&!revoked;
+      return adminSessionView==="active" ? active : !active;
+    });
+
+    if(!filtered.length){
+      list.innerHTML=adminSessionView==="active"
+        ? '<p class="muted">No active sessions.</p>'
+        : '<p class="muted">No archived sessions.</p>';
+      return;
+    }
+
+    list.innerHTML=`<div class="session-grid">${filtered.map(x=>{
+      const profile=profilesById[x.user_id]||{};
+      const revoked=!!x.revoked, active=x.is_active===true&&!revoked;
+      return `<div class="session-card">
+        <div style="display:flex;justify-content:space-between;gap:8px">
+          <div><strong>${esc(x.device_name||"Unknown device")}</strong>
+          <div class="muted" style="font-size:11px;margin-top:4px">${esc(profile.full_name||profile.email||x.user_id||"Unknown user")}</div></div>
+          <span class="session-status ${revoked?"revoked":active?"active":"inactive"}">${revoked?"REVOKED":active?"ACTIVE":"INACTIVE"}</span>
+        </div>
+        <div class="session-meta">
+          <div><span>Browser</span><br>${esc(x.browser||"—")}</div>
+          <div><span>OS</span><br>${esc(x.operating_system||"—")}</div>
+          <div><span>IP</span><br>${esc(x.ip_address||"Not exposed")}</div>
+          <div><span>Login</span><br>${fmtDate(x.login_at)}</div>
+          <div><span>Last seen</span><br>${fmtDate(x.last_seen_at)}</div>
+          <div><span>Email</span><br>${esc(profile.email||"—")}</div>
+        </div>
+        <div style="margin-top:10px;display:flex;gap:7px;flex-wrap:wrap">
+          ${active?`<button class="btn danger small" onclick="revokeSession('${x.id}')">Force Logout</button><button class="btn secondary small" onclick="revokeUserSessions('${x.user_id}')">Force Logout All</button>`:""}
+        </div>
+      </div>`;
+    }).join("")}</div>`;
+  }catch(e){
+    list.innerHTML=`<div class="form-note">Session table unavailable: ${esc(e.message)}</div>`;
+  }
+}
+
+async function revokeSession(id){
+  if(!confirm("Force logout this device?"))return;
+  const {data,error}=await sb.rpc("admin_force_logout",{p_session_id:id});
+  if(error)return toast(error.message,true);
+  if(data!==true)return toast("Session could not be revoked.",true);
+  toast("Device session revoked.");
+  await loadAdminSessions();
+}
+
+async function revokeUserSessions(uid){
+  if(!confirm("Force logout all sessions for this user?"))return;
+  const {data,error}=await sb.rpc("admin_force_logout_user",{p_user_id:uid});
+  if(error)return toast(error.message,true);
+  toast(`${Number(data)||0} session(s) revoked.`);
+  await loadAdminSessions();
+}
+
+if($("activeSessionsBtn"))$("activeSessionsBtn").onclick=()=>{
+  adminSessionView="active";
+  $("activeSessionsBtn").classList.remove("secondary");
+  $("archivedSessionsBtn").classList.add("secondary");
+  loadAdminSessions();
+};
+
+if($("archivedSessionsBtn"))$("archivedSessionsBtn").onclick=()=>{
+  adminSessionView="archived";
+  $("archivedSessionsBtn").classList.remove("secondary");
+  $("activeSessionsBtn").classList.add("secondary");
+  loadAdminSessions();
+};
+
+if($("refreshSessionsBtn"))$("refreshSessionsBtn").onclick=loadAdminSessions;
+
+async function setupSessionMonitor(){
+  if(!currentUser)return;
+
+  let ready=false;
+  if(currentSessionId){
+    ready=await validateSession();
+  }else{
+    ready=await registerSession();
+  }
+  if(!ready)return;
+
+  clearInterval(window.__sessionHeartbeat);
+  window.__sessionHeartbeat=setInterval(async()=>{
+    if(await validateSession()) await heartbeatSession();
+  },30000);
+
+  if(sessionChannel)sb.removeChannel(sessionChannel);
+  sessionChannel=sb.channel(`session_watch_${currentUser.id}_${currentSessionId}`)
+    .on("postgres_changes",{event:"UPDATE",schema:"public",table:"user_sessions",filter:`user_id=eq.${currentUser.id}`},async p=>{
+      const row=p.new||{};
+      if(row.id===currentSessionId && (row.revoked===true || row.is_active===false)){
+        await handleSessionRevoked("Your session was revoked by another login or an administrator.");
+        return;
+      }
+      if(currentProfile?.is_admin)loadAdminSessions();
+    }).subscribe();
+}
+
 /* ---------- Tabs ---------- */
 
 document.querySelectorAll("[data-customer-tab]").forEach(btn=>{
@@ -1609,6 +2309,12 @@ document.querySelectorAll("[data-customer-tab]").forEach(btn=>{
   };
 });
 
+document.addEventListener("visibilitychange",()=>{
+  if(document.visibilityState==="visible" && currentProfile?.is_admin){
+    refreshAdminLiveData();
+  }
+});
+
 document.querySelectorAll("[data-admin-tab]").forEach(btn=>{
   btn.onclick=()=>{
     document.querySelectorAll("[data-admin-tab]").forEach(b=>b.classList.add("secondary"));
@@ -1619,6 +2325,12 @@ document.querySelectorAll("[data-admin-tab]").forEach(btn=>{
     $("adminUsersTab").classList.toggle("hidden",tab!=="users");
     $("adminTransactionsTab").classList.toggle("hidden",tab!=="transactions");
     $("adminWithdrawTab").classList.toggle("hidden",tab!=="withdraw");
+    $("adminSessionsTab").classList.toggle("hidden",tab!=="sessions");
+    if(tab==="orders"){
+      loadAdminOrders(adminOrderFilter);
+      refreshAdminUnreadState(false);
+    }
+    if(tab==="sessions") loadAdminSessions();
   };
 });
 
