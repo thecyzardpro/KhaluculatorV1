@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>KhaluCulator™</title>
+<title>>KhaluCulator™</title>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
@@ -1255,7 +1255,11 @@ function setupUserRealtime(){
       async()=>await Promise.all([loadWallet(),loadMyTransactions()]))
     .on("postgres_changes",{event:"INSERT",schema:"public",table:"messages"},
       async payload=>{
-        if(activeOrderId===payload.new.order_id) return;
+        if(activeOrderId===payload.new.order_id){
+          /* The dedicated open-chat channel renders the message immediately.
+             Do not create a second badge/count while that chat is open. */
+          return;
+        }
         await loadMyOrders();
         toast("New chat message received.");
       })
@@ -1655,6 +1659,9 @@ async function setupAdminRealtime(){
 
         /* The open chat channel already renders the message itself. */
         if(activeOrderId===orderId){
+          /* The dedicated open-chat channel renders the message immediately
+             and markOrderRead() clears its unread state. Never show a badge
+             while the admin is actively viewing this conversation. */
           await refreshAdminUnreadState(false);
           return;
         }
@@ -1893,44 +1900,75 @@ async function openChat(orderId){
     .on("postgres_changes",
       {event:"INSERT",schema:"public",table:"messages",filter:`order_id=eq.${orderId}`},
       async payload=>{
-        if(payload.new.sender_id!==currentUser.id){
-          /*
-             Realtime fires as soon as the message row is inserted.
-             Image attachments are inserted immediately after that, so
-             fetch the complete message before rendering it. A short retry
-             window prevents an empty image bubble while uploads finish.
-          */
-          let fullMessage=null;
-          let messageError=null;
+        const incoming=payload?.new;
+        if(!incoming || incoming.order_id!==orderId) return;
+        if(incoming.sender_id===currentUser.id) return;
 
-          for(let attempt=0;attempt<80;attempt++){
-            const result=await sb.from("messages")
-              .select("id,order_id,sender_id,text,created_at,read_at,message_attachments(id,storage_path,mime_type)")
-              .eq("id",payload.new.id)
-              .single();
-
-            fullMessage=result.data;
-            messageError=result.error;
-
-            if(messageError || !fullMessage) break;
-            if((fullMessage.message_attachments||[]).length>0 || attempt>=79) break;
-
-            /*
-               The messages INSERT can reach Realtime before the attachment
-               INSERT. Keep the message pending long enough for the upload and
-               attachment row to finish instead of rendering an empty bubble.
-            */
-            await new Promise(resolve=>setTimeout(resolve,250));
-          }
-
-          if(fullMessage){
-            await appendMessage(fullMessage);
-          }else{
-            console.error("Realtime message load error:",messageError);
-            await appendMessage(payload.new);
-          }
-
+        /*
+           IMPORTANT LIVE-CHAT RULE:
+           When this conversation is already open, the new TEXT must be
+           rendered immediately from the Realtime payload. We must NOT wait
+           for image attachment rows or signed URLs before showing the text.
+           Waiting here was the reason a live message could appear only after
+           a page refresh.
+        */
+        if(document.querySelector(`[data-message-id="${incoming.id}"]`)){
           await markOrderRead(orderId);
+          return;
+        }
+
+        if(incoming.text){
+          await appendMessage(incoming);
+          await markOrderRead(orderId);
+
+          /*
+             If this message also has images, load the attachment rows in the
+             background and add them to the SAME bubble. The conversation does
+             not wait for image loading before displaying the text.
+          */
+          (async()=>{
+            let fullMessage=null;
+            for(let attempt=0;attempt<20;attempt++){
+              const result=await sb.from("messages")
+                .select("id,order_id,sender_id,text,created_at,read_at,message_attachments(id,storage_path,mime_type)")
+                .eq("id",incoming.id)
+                .single();
+
+              if(result.error || !result.data) break;
+              fullMessage=result.data;
+              if((fullMessage.message_attachments||[]).length>0 || attempt>=19) break;
+              await new Promise(resolve=>setTimeout(resolve,250));
+            }
+
+            if(fullMessage?.message_attachments?.length){
+              await appendMessageAttachments(incoming.id,fullMessage.message_attachments);
+            }
+          })().catch(error=>console.warn("Realtime attachment load:",error.message));
+          return;
+        }
+
+        /* Image-only message: wait for its attachment row, but never create
+           an empty bubble while the upload is still in progress. */
+        let fullMessage=null;
+        let messageError=null;
+        for(let attempt=0;attempt<80;attempt++){
+          const result=await sb.from("messages")
+            .select("id,order_id,sender_id,text,created_at,read_at,message_attachments(id,storage_path,mime_type)")
+            .eq("id",incoming.id)
+            .single();
+
+          fullMessage=result.data;
+          messageError=result.error;
+          if(messageError || !fullMessage) break;
+          if((fullMessage.message_attachments||[]).length>0 || attempt>=79) break;
+          await new Promise(resolve=>setTimeout(resolve,250));
+        }
+
+        if(fullMessage?.message_attachments?.length){
+          await appendMessage(fullMessage);
+          await markOrderRead(orderId);
+        }else if(messageError){
+          console.error("Realtime message load error:",messageError);
         }
       })
     .on("postgres_changes",
@@ -1967,6 +2005,41 @@ async function loadMessages(orderId){
   box.scrollTop=box.scrollHeight;
 }
 
+async function appendMessageAttachments(messageId,attachments){
+  if(!attachments?.length) return;
+  const row=document.querySelector(`[data-message-id="${messageId}"]`);
+  if(!row) return;
+  const bubble=row.querySelector(".bubble");
+  if(!bubble || bubble.querySelector(".attachments")) return;
+
+  const attBox=document.createElement("div");
+  attBox.className="attachments";
+  const paths=attachments.map(att=>att.storage_path);
+  const {data:signedData,error:signedError}=await sb.storage
+    .from(CHAT_BUCKET)
+    .createSignedUrls(paths,3600);
+
+  if(signedError || !Array.isArray(signedData)) return;
+
+  const imageJobs=signedData.map(signed=>new Promise(resolve=>{
+    if(!signed?.signedUrl){resolve(null);return;}
+    const img=document.createElement("img");
+    img.alt="Chat image";
+    img.loading="eager";
+    img.decoding="async";
+    img.src=signed.signedUrl;
+    img.onclick=()=>window.open(signed.signedUrl,"_blank","noopener");
+    const done=()=>resolve(img);
+    img.addEventListener("load",done,{once:true});
+    img.addEventListener("error",()=>resolve(null),{once:true});
+    if(img.complete) resolve(img.naturalWidth>0?img:null);
+  }));
+
+  const loadedImages=await Promise.all(imageJobs);
+  for(const img of loadedImages) if(img) attBox.appendChild(img);
+  if(attBox.children.length) bubble.appendChild(attBox);
+}
+
 async function appendMessage(message){
   const box=$("chatMessages");
   const isMe=message.sender_id===currentUser.id;
@@ -1980,6 +2053,7 @@ async function appendMessage(message){
   */
   const row=document.createElement("div");
   row.className="message-row"+(isMe?" me":"");
+  row.dataset.messageId=message.id;
 
   const bubble=document.createElement("div");
   bubble.className="bubble";
