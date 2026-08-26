@@ -89,7 +89,7 @@ label{display:block;font-size:13px;color:var(--muted);margin:10px 0 6px}
 }
 .product-image-wrap{
   width:100%;height:190px;border-radius:10px;
-  background:linear-gradient(180deg,#0d140e,#080b08);
+  background:#000;
   border:1px solid #173a1b;display:flex;align-items:center;
   justify-content:center;overflow:hidden;margin-bottom:10px
 }
@@ -1217,6 +1217,8 @@ $("logoutBtn").onclick=async()=>{
   if(sessionChannel) await sb.removeChannel(sessionChannel);
 
   clearInterval(window.__sessionHeartbeat);
+  clearInterval(window.__customerProductsRefresh);
+  window.__customerProductsRefresh=null;
   stopAdminUnreadFallback();
   stopAdminLiveRefresh();
   clearStoredLoginSession();
@@ -1264,15 +1266,16 @@ function productImageMarkup(product){
   const safeName=esc(product?.name||"Product");
   return `
     <div class="product-image-wrap">
-      <img src="${safeSrc}" alt="${safeName}" loading="lazy" decoding="async"
+      <img src="${safeSrc}" alt="${safeName}" loading="eager" decoding="async" fetchpriority="high"
         onerror="this.style.display='none';this.nextElementSibling.style.display='grid'">
       <div class="product-image-fallback" style="display:none" aria-hidden="true">🛍️</div>
     </div>`;
 }
 
-async function loadProducts(){
+async function loadProducts(silent=false){
   const list=$("productsList");
-  list.innerHTML='<p class="muted">Loading products...</p>';
+  if(!silent)
+    list.innerHTML='<p class="muted">Loading products...</p>';
 
   const {data,error}=await sb.from("products")
     .select("id,name,description,price_tzs,image_url,active")
@@ -1613,6 +1616,21 @@ function setupUserRealtime(){
       {
         event:"*",
         schema:"public",
+        table:"products"
+      },
+      async()=>{
+        try{
+          await loadProducts(true);
+        }catch(e){
+          console.warn("Customer products realtime:",e.message);
+        }
+      }
+    )
+    .on(
+      "postgres_changes",
+      {
+        event:"*",
+        schema:"public",
         table:"orders",
         filter:`user_id=eq.${currentUser.id}`
       },
@@ -1648,6 +1666,13 @@ function setupUserRealtime(){
       }
     )
     .subscribe();
+
+  // Safety-net for a missed realtime event. Silent, so the catalogue never blinks.
+  clearInterval(window.__customerProductsRefresh);
+  window.__customerProductsRefresh=setInterval(()=>{
+    if(document.visibilityState==="visible" && currentProfile && !currentProfile.is_admin)
+      loadProducts(true);
+  },15000);
 }
 
 /* ---------- Unread messages ---------- */
@@ -2182,7 +2207,7 @@ async function setupAdminRealtime(){
     async()=>{
       try{
         await Promise.all([
-          loadProducts(),
+          loadProducts(true),
           loadAdminProducts()
         ]);
       }catch(e){
@@ -2241,12 +2266,48 @@ function previewAdminProductImage(file){
   adminProductImageObjectUrl=URL.createObjectURL(file);
 
   $("adminProductImagePreview").innerHTML=`
-    <div style="width:min(220px,100%);aspect-ratio:1/1;border:1px solid #2b3a2e;border-radius:14px;padding:10px;display:flex;align-items:center;justify-content:center;background:#101511">
+    <div style="width:min(220px,100%);aspect-ratio:1/1;border:1px solid #2b3a2e;border-radius:14px;padding:10px;display:flex;align-items:center;justify-content:center;background:#000">
       <img src="${esc(adminProductImageObjectUrl)}"
            alt="Product image preview"
            style="max-width:100%;max-height:100%;object-fit:contain;border-radius:10px">
     </div>
   `;
+}
+
+async function prepareProductImage(file,productId){
+  // Keep the transparent product cut-out, but resize/re-encode it locally
+  // so large phone/camera PNGs upload much faster.
+  const MAX_SIDE=1200;
+  const TARGET_BYTES=850 * 1024;
+
+  const bitmap=await createImageBitmap(file);
+  const scale=Math.min(1,MAX_SIDE/Math.max(bitmap.width,bitmap.height));
+  const width=Math.max(1,Math.round(bitmap.width*scale));
+  const height=Math.max(1,Math.round(bitmap.height*scale));
+
+  const canvas=document.createElement("canvas");
+  canvas.width=width;
+  canvas.height=height;
+  const ctx=canvas.getContext("2d",{alpha:true});
+  ctx.clearRect(0,0,width,height);
+  ctx.drawImage(bitmap,0,0,width,height);
+  bitmap.close();
+
+  // WebP keeps alpha/transparency and is normally much smaller than PNG.
+  let quality=0.88;
+  let blob=await new Promise(resolve=>canvas.toBlob(resolve,"image/webp",quality));
+
+  while(blob && blob.size>TARGET_BYTES && quality>0.60){
+    quality-=0.06;
+    blob=await new Promise(resolve=>canvas.toBlob(resolve,"image/webp",quality));
+  }
+
+  if(!blob) throw new Error("Could not prepare product image.");
+
+  return new File([blob],`${productId}-${Date.now()}.webp`,{
+    type:"image/webp",
+    lastModified:Date.now()
+  });
 }
 
 async function uploadAdminProductImage(file,productId){
@@ -2258,18 +2319,15 @@ async function uploadAdminProductImage(file,productId){
   if(file.size>MAX_PRODUCT_IMAGE_BYTES)
     throw new Error("Product image must be 20MB or smaller.");
 
-  const ext =
-    file.type==="image/png" ? "png" :
-    file.type==="image/webp" ? "webp" : "jpg";
-
-  const path=`products/${productId}-${Date.now()}.${ext}`;
+  const optimizedFile=await prepareProductImage(file,productId);
+  const path=`products/${optimizedFile.name}`;
 
   const {error:uploadError}=await sb.storage
     .from(PRODUCT_IMAGE_BUCKET)
-    .upload(path,file,{
+    .upload(path,optimizedFile,{
       cacheControl:"31536000",
       upsert:false,
-      contentType:file.type
+      contentType:"image/webp"
     });
 
   if(uploadError)
@@ -2310,7 +2368,7 @@ async function loadAdminProducts(){
     const image=productImageSrc(p);
     return `
       <div class="order" style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
-        <div style="width:76px;height:76px;border-radius:12px;border:1px solid #2b3a2e;display:flex;align-items:center;justify-content:center;overflow:hidden;background:#101511;flex:0 0 auto">
+        <div style="width:76px;height:76px;border-radius:12px;border:0;display:flex;align-items:center;justify-content:center;overflow:hidden;background:#000;flex:0 0 auto">
           <img src="${esc(image)}"
                alt="${esc(p.name)}"
                loading="lazy"
@@ -2355,7 +2413,7 @@ async function editAdminProduct(productId){
   if(data.image_url){
     $("adminProductImagePreview").innerHTML=`
       <div class="muted" style="font-size:11px;margin-bottom:6px">Current image</div>
-      <div style="width:min(220px,100%);aspect-ratio:1/1;border:1px solid #2b3a2e;border-radius:14px;padding:10px;display:flex;align-items:center;justify-content:center;background:#101511">
+      <div style="width:min(220px,100%);aspect-ratio:1/1;border:1px solid #2b3a2e;border-radius:14px;padding:10px;display:flex;align-items:center;justify-content:center;background:#000">
         <img src="${esc(data.image_url)}"
              alt="${esc(data.name)}"
              style="max-width:100%;max-height:100%;object-fit:contain;border-radius:10px">
