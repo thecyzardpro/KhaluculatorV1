@@ -2826,18 +2826,23 @@ async function heartbeatSession(){
     if(error)
       throw error;
 
-    if(data!==true){
+    /*
+     * Only treat an explicit FALSE from the database as a real revocation.
+     * Temporary/network/RPC response issues must NOT log the user out.
+     */
+    if(data===false){
       await handleSessionRevoked(
         "Your session is no longer active."
       );
       return false;
     }
 
-    return true;
+    return data===true;
 
   }catch(e){
     console.warn("Session heartbeat:",e.message);
-    return false;
+    /* Keep the current login during transient network/RPC failures. */
+    return true;
   }
 }
 
@@ -2857,18 +2862,23 @@ async function validateSession(){
     if(error)
       throw error;
 
-    if(!data?.valid){
+    /*
+     * Logout only when the session check explicitly says valid=false.
+     * Do not revoke the user because of a temporary/invalid response.
+     */
+    if(data?.valid===false){
       await handleSessionRevoked(
         "This session was revoked or is no longer active."
       );
       return false;
     }
 
-    return true;
+    return data?.valid===true;
 
   }catch(e){
     console.warn("Session validation:",e.message);
-    return false;
+    /* Temporary validation errors must not log out the user. */
+    return true;
   }
 }
 
