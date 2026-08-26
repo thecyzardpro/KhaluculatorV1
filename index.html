@@ -1678,7 +1678,7 @@ async function refreshAdminLiveData(){
   try{
     await Promise.all([
       loadAdminStats(),
-      loadAdminOrders(adminOrderFilter),
+      loadAdminOrders(adminOrderFilter,{silent:true}),
       loadAdminUsers(),
       refreshAdminUnreadState(false)
     ]);
@@ -1689,14 +1689,10 @@ async function refreshAdminLiveData(){
   }
 }
 
+/* Realtime handles database changes. Do not poll/reload the admin UI every 3s. */
 function startAdminLiveRefresh(){
   clearInterval(adminLiveRefreshTimer);
-
-  adminLiveRefreshTimer=setInterval(()=>{
-    if(document.visibilityState==="visible" && currentProfile?.is_admin){
-      refreshAdminLiveData();
-    }
-  },3000);
+  adminLiveRefreshTimer=null;
 }
 
 function stopAdminLiveRefresh(){
@@ -1762,11 +1758,13 @@ async function loadAdminStats(){
     Object.values(unread).reduce((a,b)=>a+b,0);
 }
 
-async function loadAdminOrders(status){
+async function loadAdminOrders(status,options={}){
   adminOrderFilter=status;
 
+  const silent=options.silent===true;
   const list=$("adminOrdersList");
-  list.innerHTML='<p class="muted">Loading orders...</p>';
+  if(!silent && !list.dataset.hasRendered)
+    list.innerHTML='<p class="muted">Loading orders...</p>';
 
   const {data,error}=await sb.from("orders")
     .select(`
@@ -1784,13 +1782,18 @@ async function loadAdminOrders(status){
   }
 
   if(!data?.length){
-    list.innerHTML=`<p class="muted">No ${status} orders.</p>`;
+    const emptyHtml=`<p class="muted">No ${status} orders.</p>`;
+    if(list.dataset.renderKey!==emptyHtml){
+      list.innerHTML=emptyHtml;
+      list.dataset.renderKey=emptyHtml;
+      list.dataset.hasRendered="1";
+    }
     return;
   }
 
   const unreadMap=await getUnreadCounts(data.map(o=>o.id));
 
-  list.innerHTML=data.map(o=>{
+  const nextHtml=data.map(o=>{
     const unread=unreadMap[o.id]||0;
 
     const mapBtn=o.delivery_lat!=null
@@ -1841,6 +1844,13 @@ async function loadAdminOrders(status){
       </div>
     `;
   }).join("");
+
+  if(list.dataset.renderKey===nextHtml)
+    return;
+
+  list.innerHTML=nextHtml;
+  list.dataset.renderKey=nextHtml;
+  list.dataset.hasRendered="1";
 }
 
 $("pendingFilter").onclick=()=>loadAdminOrders("pending");
@@ -1970,7 +1980,7 @@ async function setupAdminRealtime(){
       try{
         await Promise.all([
           loadAdminStats(),
-          loadAdminOrders(adminOrderFilter),
+          loadAdminOrders(adminOrderFilter,{silent:true}),
           refreshAdminUnreadState(false)
         ]);
 
@@ -1999,7 +2009,7 @@ async function setupAdminRealtime(){
         await refreshAdminUnreadState(false);
 
         if(adminOrderFilter==="pending")
-          await loadAdminOrders("pending");
+          await loadAdminOrders("pending",{silent:true});
 
         await loadAdminStats();
         toast("🔴 New customer message.");
