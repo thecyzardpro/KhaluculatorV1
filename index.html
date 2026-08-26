@@ -1645,7 +1645,7 @@ async function refreshAdminUnreadState(renderOrders=false){
     });
 
     if(renderOrders && adminOrderFilter==="pending"){
-      await loadAdminOrders("pending");
+      await loadAdminOrders("pending",{silent:true});
     }
 
   }catch(e){
@@ -1669,6 +1669,9 @@ function stopAdminUnreadFallback(){
   adminUnreadRefreshTimer=null;
 }
 
+let adminOrdersRequestSeq=0;
+let adminOrdersLastSync=0;
+
 async function refreshAdminLiveData(){
   if(!currentProfile?.is_admin || !sb || !currentUser || adminLiveRefreshBusy)
     return;
@@ -1676,10 +1679,10 @@ async function refreshAdminLiveData(){
   adminLiveRefreshBusy=true;
 
   try{
+    // Counters stay live in the background. Orders are refreshed primarily
+    // through Realtime, with a slower fallback below.
     await Promise.all([
       loadAdminStats(),
-      loadAdminOrders(adminOrderFilter,{silent:true}),
-      loadAdminUsers(),
       refreshAdminUnreadState(false)
     ]);
   }catch(e){
@@ -1692,13 +1695,17 @@ async function refreshAdminLiveData(){
 function startAdminLiveRefresh(){
   clearInterval(adminLiveRefreshTimer);
 
-  // Silent background sync: keeps dashboard counts fresh without replacing
-  // the visible page/list and without causing scroll jumps or blinking.
+  // Do not hammer the orders query every 3 seconds. Realtime is immediate;
+  // this 10-second fallback only catches missed realtime events.
   adminLiveRefreshTimer=setInterval(()=>{
-    if(document.visibilityState==="visible" && currentProfile?.is_admin){
-      refreshAdminLiveData();
-    }
-  },3000);
+    if(document.visibilityState!=="visible" || !currentProfile?.is_admin)
+      return;
+
+    refreshAdminLiveData();
+
+    if(Date.now()-adminOrdersLastSync>=10000)
+      loadAdminOrders(adminOrderFilter,{silent:true});
+  },5000);
 }
 
 function stopAdminLiveRefresh(){
@@ -1769,88 +1776,95 @@ async function loadAdminOrders(status,options={}){
 
   const list=$("adminOrdersList");
   const silent=options.silent===true;
-  if(!silent) list.innerHTML='<p class="muted">Loading orders...</p>';
+  const requestSeq=++adminOrdersRequestSeq;
 
-  const {data,error}=await sb.from("orders")
-    .select(`
-      id,user_id,status,price_tzs,payment_method,delivery_address,delivery_lat,delivery_lng,
-      delivery_place_name,created_at,updated_at,
-      profiles(full_name,email),
-      products(name)
-    `)
-    .eq("status",status)
-    .order("created_at",{ascending:false});
+  if(!silent && !list.dataset.renderKey)
+    list.innerHTML='<p class="muted">Loading orders...</p>';
 
-  if(error){
-    list.innerHTML=`<p class="red">${esc(error.message)}</p>`;
-    return;
-  }
+  try{
+    const result=await Promise.race([
+      sb.from("orders")
+        .select(`
+          id,user_id,status,price_tzs,payment_method,delivery_address,delivery_lat,delivery_lng,
+          delivery_place_name,created_at,updated_at,
+          profiles(full_name,email),
+          products(name)
+        `)
+        .eq("status",status)
+        .order("created_at",{ascending:false}),
+      new Promise((_,reject)=>setTimeout(()=>reject(new Error("Orders request timed out")),12000))
+    ]);
 
-  if(!data?.length){
-    list.innerHTML=`<p class="muted">No ${status} orders.</p>`;
-    return;
-  }
+    if(requestSeq!==adminOrdersRequestSeq)return;
+    const {data,error}=result;
+    if(error)throw error;
 
-  const unreadMap=await getUnreadCounts(data.map(o=>o.id));
+    adminOrdersLastSync=Date.now();
 
-  const nextHtml=data.map(o=>{
-    const unread=unreadMap[o.id]||0;
+    if(!data?.length){
+      const emptyHtml=`<p class="muted">No ${status} orders.</p>`;
+      if(list.dataset.renderKey!==emptyHtml){
+        list.innerHTML=emptyHtml;
+        list.dataset.renderKey=emptyHtml;
+      }
+      return;
+    }
 
-    const mapBtn=o.delivery_lat!=null
-      ? `<a class="btn secondary small" target="_blank" rel="noopener" href="${mapLink(o.delivery_lat,o.delivery_lng)}">📍 Map</a>`
-      : "";
+    const unreadMap=await getUnreadCounts(data.map(o=>o.id));
+    if(requestSeq!==adminOrdersRequestSeq)return;
 
-    return `
-      <div class="order" data-admin-order-id="${esc(o.id)}">
-        <div class="order-head">
-          <div>
-            <strong>${esc(o.products?.name||"Product")}</strong>
-            <div style="margin-top:4px">👤 ${esc(o.profiles?.full_name||"Unknown")}</div>
-            <div class="muted" style="font-size:11px">${esc(o.profiles?.email||"")}</div>
-          </div>
+    const nextHtml=data.map(o=>{
+      const unread=unreadMap[o.id]||0;
+      const mapBtn=o.delivery_lat!=null
+        ? `<a class="btn secondary small" target="_blank" rel="noopener" href="${mapLink(o.delivery_lat,o.delivery_lng)}">📍 Map</a>`
+        : "";
 
-          <div style="text-align:right">
-            <div class="green">${money(o.price_tzs)}</div>
-            <div class="payment-badge">
-              ${o.payment_method==="in_hand" ? "🤝 PAY IN HAND" : "💳 WALLET"}
+      return `
+        <div class="order" data-admin-order-id="${esc(o.id)}">
+          <div class="order-head">
+            <div>
+              <strong>${esc(o.products?.name||"Product")}</strong>
+              <div style="margin-top:4px">👤 ${esc(o.profiles?.full_name||"Unknown")}</div>
+              <div class="muted" style="font-size:11px">${esc(o.profiles?.email||"")}</div>
             </div>
-            <span class="status ${esc(o.status)}">${esc(o.status)}</span>
+            <div style="text-align:right">
+              <div class="green">${money(o.price_tzs)}</div>
+              <div class="payment-badge">
+                ${o.payment_method==="in_hand" ? "🤝 PAY IN HAND" : "💳 WALLET"}
+              </div>
+              <span class="status ${esc(o.status)}">${esc(o.status)}</span>
+            </div>
+          </div>
+          ${unread ? `<div class="admin-new-message-badge">🔴 NEW MESSAGE · ${unread}</div>` : ""}
+          <div class="muted" style="margin-top:8px">
+            📍 ${esc(o.delivery_address||"No text address")}
+          </div>
+          <div style="display:flex;gap:7px;flex-wrap:wrap;margin-top:10px">
+            ${status==="pending" ? `
+              <button class="btn small" data-admin-chat-button onclick="openChat('${o.id}')">
+                💬 Chat ${unread ? `<span class="badge">${unread}</span>` : ""}
+              </button>
+            ` : ""}
+            ${mapBtn}
+            ${status==="pending" ? `
+              <button class="btn blue small" onclick="deliverOrder('${o.id}')">
+                Verify & Deliver
+              </button>
+            ` : ""}
           </div>
         </div>
+      `;
+    }).join("");
 
-        ${unread ? `<div class="admin-new-message-badge">🔴 NEW MESSAGE · ${unread}</div>` : ""}
-
-        <div class="muted" style="margin-top:8px">
-          📍 ${esc(o.delivery_address||"No text address")}
-        </div>
-
-        <div style="display:flex;gap:7px;flex-wrap:wrap;margin-top:10px">
-
-          ${status==="pending" ? `
-            <button class="btn small" data-admin-chat-button onclick="openChat('${o.id}')">
-              💬 Chat ${unread ? `<span class="badge">${unread}</span>` : ""}
-            </button>
-          ` : ""}
-
-          ${mapBtn}
-
-          ${status==="pending" ? `
-            <button class="btn blue small" onclick="deliverOrder('${o.id}')">
-              Verify & Deliver
-            </button>
-          ` : ""}
-
-        </div>
-      </div>
-    `;
-  }).join("");
-
-  // Background updates must not rebuild an unchanged list.
-  if(list.dataset.renderKey===nextHtml)
-    return;
-
-  list.innerHTML=nextHtml;
-  list.dataset.renderKey=nextHtml;
+    if(list.dataset.renderKey===nextHtml)return;
+    list.innerHTML=nextHtml;
+    list.dataset.renderKey=nextHtml;
+  }catch(e){
+    // Never erase already-visible orders because a background request is slow.
+    if(!silent && !list.dataset.renderKey)
+      list.innerHTML=`<p class="red">${esc(e.message)}</p>`;
+    console.warn("Admin orders load:",e.message);
+  }
 }
 
 $("pendingFilter").onclick=()=>loadAdminOrders("pending");
@@ -1980,7 +1994,7 @@ async function setupAdminRealtime(){
       try{
         await Promise.all([
           loadAdminStats(),
-          loadAdminOrders(adminOrderFilter),
+          loadAdminOrders(adminOrderFilter,{silent:true}),
           refreshAdminUnreadState(false)
         ]);
 
