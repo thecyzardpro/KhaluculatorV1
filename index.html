@@ -83,8 +83,21 @@ label{display:block;font-size:13px;color:var(--muted);margin:10px 0 6px}
   background:#0b100c
 }
 .product img{
-  width:100%;height:170px;object-fit:cover;border-radius:10px;
-  background:#111;margin-bottom:10px
+  width:100%;height:190px;object-fit:contain;border-radius:10px;
+  background:transparent;margin-bottom:10px;display:block;
+  padding:6px;box-sizing:border-box
+}
+.product-image-wrap{
+  width:100%;height:190px;border-radius:10px;
+  background:linear-gradient(180deg,#0d140e,#080b08);
+  border:1px solid #173a1b;display:flex;align-items:center;
+  justify-content:center;overflow:hidden;margin-bottom:10px
+}
+.product-image-wrap img{margin:0;border:0}
+.product-image-fallback{
+  width:72px;height:72px;border-radius:16px;display:grid;place-items:center;
+  background:#143619;border:1px solid #2d7134;color:var(--green);
+  font-size:30px;font-weight:900
 }
 .product h3{margin-bottom:7px}
 .price{font-weight:900;color:var(--green);font-size:20px}
@@ -404,6 +417,7 @@ th{color:#9bd49e}
       <button class="btn secondary small" data-admin-tab="transactions">Transactions</button>
       <button class="btn secondary small" data-admin-tab="withdraw">Withdraw</button>
       <button class="btn secondary small" data-admin-tab="sessions">Devices</button>
+      <button class="btn secondary small" data-admin-tab="products">Products</button>
     </div>
 
     <div id="adminOrdersTab">
@@ -470,6 +484,57 @@ th{color:#9bd49e}
           </div>
         </div>
         <div id="adminSessionsList" style="margin-top:14px"><p class="muted">Loading sessions...</p></div>
+      </div>
+    </div>
+
+    <div id="adminProductsTab" class="hidden">
+      <div class="card">
+        <h2>Product Images & Products</h2>
+        <p class="muted" style="font-size:12px;margin-top:5px">
+          Add or update a product and upload its image directly from Admin.
+          PNG, JPG and WEBP are supported.
+        </p>
+
+        <div class="form-shell" style="margin-top:14px">
+          <input type="hidden" id="adminProductId">
+
+          <div class="field">
+            <label for="adminProductName">Product name</label>
+            <input id="adminProductName" maxlength="120" placeholder="Product name">
+          </div>
+
+          <div class="field">
+            <label for="adminProductDescription">Description</label>
+            <textarea id="adminProductDescription" rows="3" maxlength="500" placeholder="Product description"></textarea>
+          </div>
+
+          <div class="field">
+            <label for="adminProductPrice">Price (TSH)</label>
+            <input id="adminProductPrice" type="number" min="1" step="1" inputmode="numeric" placeholder="10000">
+          </div>
+
+          <div class="field">
+            <label for="adminProductImage">Product image</label>
+            <input id="adminProductImage" type="file" accept="image/png,image/jpeg,image/webp">
+            <div class="muted" style="font-size:11px;margin-top:5px">
+              Transparent PNG is recommended. Maximum 5MB.
+            </div>
+            <div id="adminProductImagePreview" style="margin-top:10px"></div>
+          </div>
+
+          <div class="form-actions">
+            <button class="btn" id="saveAdminProductBtn">Save Product</button>
+            <button class="btn secondary" id="cancelAdminProductBtn" type="button">Clear</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:14px">
+        <div style="display:flex;justify-content:space-between;gap:10px;align-items:center">
+          <h2>Products</h2>
+          <button class="btn secondary small" id="refreshAdminProductsBtn">↻ Refresh</button>
+        </div>
+        <div id="adminProductsList" style="margin-top:14px"></div>
       </div>
     </div>
 </section>
@@ -668,6 +733,8 @@ let adminUnreadRefreshTimer = null;
 let adminUnreadRefreshBusy = false;
 let adminLiveRefreshTimer = null;
 let adminLiveRefreshBusy = false;
+let adminProductsChannel = null;
+let adminProductImageObjectUrl = null;
 
 /* ---------- Utilities ---------- */
 
@@ -1179,6 +1246,30 @@ async function loadWallet(){
   $("walletBalance").textContent=money(data);
 }
 
+function productImageSlug(name){
+  return String(name||"product")
+    .trim().toLowerCase()
+    .replace(/[^a-z0-9]+/g,"-")
+    .replace(/^-+|-+$/g,"");
+}
+
+function productImageSrc(product){
+  if(product?.image_url) return product.image_url;
+  return `/product-images/${productImageSlug(product?.name)}.png`;
+}
+
+function productImageMarkup(product){
+  const src=productImageSrc(product);
+  const safeSrc=esc(src);
+  const safeName=esc(product?.name||"Product");
+  return `
+    <div class="product-image-wrap">
+      <img src="${safeSrc}" alt="${safeName}" loading="lazy" decoding="async"
+        onerror="this.style.display='none';this.nextElementSibling.style.display='grid'">
+      <div class="product-image-fallback" style="display:none" aria-hidden="true">🛍️</div>
+    </div>`;
+}
+
 async function loadProducts(){
   const list=$("productsList");
   list.innerHTML='<p class="muted">Loading products...</p>';
@@ -1200,7 +1291,7 @@ async function loadProducts(){
 
   list.innerHTML=data.map(p=>`
     <article class="product">
-      ${p.image_url ? `<img src="${esc(p.image_url)}" alt="${esc(p.name)}">` : ""}
+      ${productImageMarkup(p)}
       <h3>${esc(p.name)}</h3>
       <p class="muted" style="min-height:35px">${esc(p.description||"")}</p>
       <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:12px">
@@ -1695,19 +1786,19 @@ async function refreshAdminLiveData(){
 function startAdminLiveRefresh(){
   clearInterval(adminLiveRefreshTimer);
 
-  // Do not hammer the orders query every 3 seconds. Realtime is immediate;
-  // this 10-second fallback only catches missed realtime events.
+  // Dashboard counters keep updating automatically, but the visible orders
+  // list is NOT rebuilt every few seconds. Realtime handles order changes
+  // immediately; this slower fallback only catches missed events.
   adminLiveRefreshTimer=setInterval(()=>{
     if(document.visibilityState!=="visible" || !currentProfile?.is_admin)
       return;
 
     refreshAdminLiveData();
 
-    if(Date.now()-adminOrdersLastSync>=10000)
+    if(Date.now()-adminOrdersLastSync>=15000)
       loadAdminOrders(adminOrderFilter,{silent:true});
   },5000);
 }
-
 function stopAdminLiveRefresh(){
   clearInterval(adminLiveRefreshTimer);
   adminLiveRefreshTimer=null;
@@ -1722,7 +1813,8 @@ async function initAdmin(){
     loadAdminOrders("pending"),
     loadAdminUsers(),
     loadAdminTransactions(),
-    loadWithdrawals()
+    loadWithdrawals(),
+    loadAdminProducts()
   ]);
 
   await setupAdminRealtime();
@@ -2023,7 +2115,7 @@ async function setupAdminRealtime(){
         await refreshAdminUnreadState(false);
 
         if(adminOrderFilter==="pending")
-          await loadAdminOrders("pending");
+          await loadAdminOrders("pending",{silent:true});
 
         await loadAdminStats();
         toast("🔴 New customer message.");
@@ -2089,7 +2181,10 @@ async function setupAdminRealtime(){
     {event:"*",schema:"public",table:"products"},
     async()=>{
       try{
-        await loadProducts();
+        await Promise.all([
+          loadProducts(),
+          loadAdminProducts()
+        ]);
       }catch(e){
         console.warn("Admin products realtime:",e.message);
       }
@@ -2108,7 +2203,279 @@ async function setupAdminRealtime(){
   });
 }
 
+/* ---------- Admin Products / Image Upload ---------- */
+
+const PRODUCT_IMAGE_BUCKET = "product-images";
+const MAX_PRODUCT_IMAGE_BYTES = 5 * 1024 * 1024;
+
+function clearAdminProductImagePreview(){
+  const box=$("adminProductImagePreview");
+  if(box) box.innerHTML="";
+  if(adminProductImageObjectUrl){
+    URL.revokeObjectURL(adminProductImageObjectUrl);
+    adminProductImageObjectUrl=null;
+  }
+}
+
+function resetAdminProductForm(){
+  $("adminProductId").value="";
+  $("adminProductName").value="";
+  $("adminProductDescription").value="";
+  $("adminProductPrice").value="";
+  $("adminProductImage").value="";
+  clearAdminProductImagePreview();
+  $("saveAdminProductBtn").textContent="Save Product";
+}
+
+function previewAdminProductImage(file){
+  clearAdminProductImagePreview();
+
+  if(!file)return;
+
+  if(!["image/png","image/jpeg","image/webp"].includes(file.type))
+    return toast("Please choose a PNG, JPG or WEBP image.",true);
+
+  if(file.size>MAX_PRODUCT_IMAGE_BYTES)
+    return toast("Product image must be 5MB or smaller.",true);
+
+  adminProductImageObjectUrl=URL.createObjectURL(file);
+
+  $("adminProductImagePreview").innerHTML=`
+    <div style="width:min(220px,100%);aspect-ratio:1/1;border:1px solid #2b3a2e;border-radius:14px;padding:10px;display:flex;align-items:center;justify-content:center;background:#101511">
+      <img src="${esc(adminProductImageObjectUrl)}"
+           alt="Product image preview"
+           style="max-width:100%;max-height:100%;object-fit:contain;border-radius:10px">
+    </div>
+  `;
+}
+
+async function uploadAdminProductImage(file,productId){
+  if(!file)return null;
+
+  if(!["image/png","image/jpeg","image/webp"].includes(file.type))
+    throw new Error("Please choose a PNG, JPG or WEBP image.");
+
+  if(file.size>MAX_PRODUCT_IMAGE_BYTES)
+    throw new Error("Product image must be 5MB or smaller.");
+
+  const ext =
+    file.type==="image/png" ? "png" :
+    file.type==="image/webp" ? "webp" : "jpg";
+
+  const path=`products/${productId}-${Date.now()}.${ext}`;
+
+  const {error:uploadError}=await sb.storage
+    .from(PRODUCT_IMAGE_BUCKET)
+    .upload(path,file,{
+      cacheControl:"31536000",
+      upsert:false,
+      contentType:file.type
+    });
+
+  if(uploadError)
+    throw new Error(
+      `Image upload failed: ${uploadError.message}. `+
+      `Make sure the "${PRODUCT_IMAGE_BUCKET}" Supabase Storage bucket exists and its policies allow admin uploads.`
+    );
+
+  const {data}=sb.storage
+    .from(PRODUCT_IMAGE_BUCKET)
+    .getPublicUrl(path);
+
+  if(!data?.publicUrl)
+    throw new Error("Image uploaded, but a public image URL could not be created.");
+
+  return data.publicUrl;
+}
+
+async function loadAdminProducts(){
+  const list=$("adminProductsList");
+  if(!list)return;
+
+  const {data,error}=await sb.from("products")
+    .select("id,name,description,price_tzs,image_url,active,created_at")
+    .order("created_at",{ascending:false});
+
+  if(error){
+    list.innerHTML=`<p class="red">${esc(error.message)}</p>`;
+    return;
+  }
+
+  if(!data?.length){
+    list.innerHTML='<p class="muted">No products yet.</p>';
+    return;
+  }
+
+  list.innerHTML=data.map(p=>{
+    const image=productImageSrc(p);
+    return `
+      <div class="order" style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
+        <div style="width:76px;height:76px;border-radius:12px;border:1px solid #2b3a2e;display:flex;align-items:center;justify-content:center;overflow:hidden;background:#101511;flex:0 0 auto">
+          <img src="${esc(image)}"
+               alt="${esc(p.name)}"
+               loading="lazy"
+               style="width:100%;height:100%;object-fit:contain"
+               onerror="this.style.display='none';this.parentElement.innerHTML='<span class=&quot;muted&quot; style=&quot;font-size:10px&quot;>No image</span>'">
+        </div>
+
+        <div style="flex:1;min-width:180px">
+          <strong>${esc(p.name)}</strong>
+          <div class="muted" style="font-size:11px;margin-top:3px">${esc(p.description||"")}</div>
+          <div class="green" style="margin-top:5px">${money(p.price_tzs)}</div>
+          <div class="muted" style="font-size:10px;margin-top:3px">${p.active ? "Active" : "Inactive"}</div>
+        </div>
+
+        <div style="display:flex;gap:7px;flex-wrap:wrap">
+          <button class="btn small" onclick="editAdminProduct('${esc(p.id)}')">Edit / Image</button>
+          <button class="btn secondary small" onclick="toggleAdminProduct('${esc(p.id)}',${p.active ? "false" : "true"})">
+            ${p.active ? "Deactivate" : "Activate"}
+          </button>
+        </div>
+      </div>
+    `;
+  }).join("");
+}
+
+async function editAdminProduct(productId){
+  const {data,error}=await sb.from("products")
+    .select("id,name,description,price_tzs,image_url,active")
+    .eq("id",productId)
+    .single();
+
+  if(error || !data)
+    return toast(error?.message || "Product not found.",true);
+
+  $("adminProductId").value=data.id;
+  $("adminProductName").value=data.name||"";
+  $("adminProductDescription").value=data.description||"";
+  $("adminProductPrice").value=data.price_tzs||"";
+  $("adminProductImage").value="";
+  clearAdminProductImagePreview();
+
+  if(data.image_url){
+    $("adminProductImagePreview").innerHTML=`
+      <div class="muted" style="font-size:11px;margin-bottom:6px">Current image</div>
+      <div style="width:min(220px,100%);aspect-ratio:1/1;border:1px solid #2b3a2e;border-radius:14px;padding:10px;display:flex;align-items:center;justify-content:center;background:#101511">
+        <img src="${esc(data.image_url)}"
+             alt="${esc(data.name)}"
+             style="max-width:100%;max-height:100%;object-fit:contain;border-radius:10px">
+      </div>
+    `;
+  }
+
+  $("saveAdminProductBtn").textContent="Update Product";
+  $("adminProductName").scrollIntoView({behavior:"smooth",block:"center"});
+}
+
+async function toggleAdminProduct(productId,active){
+  const {error}=await sb.from("products")
+    .update({active})
+    .eq("id",productId);
+
+  if(error)
+    return toast(error.message,true);
+
+  toast(active ? "Product activated." : "Product deactivated.");
+  await Promise.all([
+    loadAdminProducts(),
+    loadProducts()
+  ]);
+}
+
+$("adminProductImage").onchange=()=>{
+  const file=$("adminProductImage").files?.[0]||null;
+  previewAdminProductImage(file);
+};
+
+$("cancelAdminProductBtn").onclick=resetAdminProductForm;
+
+$("refreshAdminProductsBtn").onclick=loadAdminProducts;
+
+$("saveAdminProductBtn").onclick=async()=>{
+  if(!currentProfile?.is_admin)
+    return toast("Admin access required.",true);
+
+  const id=$("adminProductId").value.trim()||null;
+  const name=$("adminProductName").value.trim();
+  const description=$("adminProductDescription").value.trim()||null;
+  const price=Number($("adminProductPrice").value);
+  const imageFile=$("adminProductImage").files?.[0]||null;
+
+  if(!name)
+    return toast("Enter a product name.",true);
+
+  if(!Number.isInteger(price) || price<=0)
+    return toast("Enter a valid whole TSH price.",true);
+
+  if(imageFile){
+    if(!["image/png","image/jpeg","image/webp"].includes(imageFile.type))
+      return toast("Please choose a PNG, JPG or WEBP image.",true);
+
+    if(imageFile.size>MAX_PRODUCT_IMAGE_BYTES)
+      return toast("Product image must be 5MB or smaller.",true);
+  }
+
+  const button=$("saveAdminProductBtn");
+  button.disabled=true;
+  button.textContent=id ? "Updating..." : "Creating...";
+
+  try{
+    let productId=id;
+
+    if(id){
+      const {error}=await sb.from("products")
+        .update({
+          name,
+          description,
+          price_tzs:price
+        })
+        .eq("id",id);
+
+      if(error)throw error;
+    }else{
+      const {data,error}=await sb.from("products")
+        .insert({
+          name,
+          description,
+          price_tzs:price,
+          active:true
+        })
+        .select("id")
+        .single();
+
+      if(error)throw error;
+      productId=data.id;
+    }
+
+    if(imageFile){
+      const imageUrl=await uploadAdminProductImage(imageFile,productId);
+
+      const {error:imageDbError}=await sb.from("products")
+        .update({image_url:imageUrl})
+        .eq("id",productId);
+
+      if(imageDbError)throw imageDbError;
+    }
+
+    toast(id ? "Product updated successfully." : "Product created successfully.");
+
+    resetAdminProductForm();
+
+    await Promise.all([
+      loadAdminProducts(),
+      loadProducts()
+    ]);
+  }catch(error){
+    console.error("Admin product save:",error);
+    toast(error.message || "Could not save product.",true);
+  }finally{
+    button.disabled=false;
+    button.textContent=id ? "Update Product" : "Save Product";
+  }
+};
+
 /* ---------- Withdrawals ---------- */
+
 
 $("withdrawBtn").onclick=async()=>{
   const amount=Number($("withdrawAmount").value);
@@ -3277,6 +3644,14 @@ document.querySelectorAll("[data-admin-tab]").forEach(btn=>{
       "hidden",
       tab!=="sessions"
     );
+
+    $("adminProductsTab").classList.toggle(
+      "hidden",
+      tab!=="products"
+    );
+
+    if(tab==="products")
+      loadAdminProducts();
 
     if(tab==="orders"){
       loadAdminOrders(adminOrderFilter);
