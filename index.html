@@ -2256,7 +2256,7 @@ async function uploadAdminProductImage(file,productId){
     throw new Error("Please choose a PNG, JPG or WEBP image.");
 
   if(file.size>MAX_PRODUCT_IMAGE_BYTES)
-    throw new Error("Product image must be 5MB or smaller.");
+    throw new Error("Product image must be 20MB or smaller.");
 
   const ext =
     file.type==="image/png" ? "png" :
