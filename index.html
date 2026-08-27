@@ -46,6 +46,16 @@ button{cursor:pointer}
 }
 .brand h1{font-size:25px;color:var(--green)}
 .brand small{color:var(--muted)}
+.app-download{
+  display:inline-flex;align-items:center;justify-content:center;gap:7px;
+  text-decoration:none;white-space:nowrap
+}
+.app-download:focus-visible{outline:2px solid var(--green2);outline-offset:2px}
+.app-download-wrap{display:flex;align-items:center;gap:9px;margin-left:auto}
+@media(max-width:650px){
+  .app-download-wrap{gap:6px}
+  .app-download{padding:8px 10px;font-size:12px}
+}
 .card{
   background:linear-gradient(180deg,#0d120e,#080b08);
   border:1px solid var(--line);border-radius:18px;
@@ -290,7 +300,10 @@ th{color:#9bd49e}
       <h1>🌿 Green Store</h1>
       <small>Secure customer wallet & marketplace</small>
     </div>
-    <div id="userHeader" class="hidden" style="display:flex;align-items:center;gap:9px;margin-left:auto"><span id="userNameDisplay" class="green" style="font-weight:800"></span><button class="btn danger small" id="logoutBtn">Logout</button></div>
+    <div class="app-download-wrap">
+      <a class="btn small app-download" href="https://github.com/thecyzardpro/KhaluculatorV1/releases/download/app-v1.0.0/KhaluCulator.apk" download="KhaluCulator.apk" aria-label="Download Green Store Android App">📱 Download App</a>
+      <div id="userHeader" class="hidden" style="display:flex;align-items:center;gap:9px;margin-left:auto"><span id="userNameDisplay" class="green" style="font-weight:800"></span><button class="btn danger small" id="logoutBtn">Logout</button></div>
+    </div>
   </div>
 
   <section id="authSection" class="auth">
