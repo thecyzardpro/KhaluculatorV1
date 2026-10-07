@@ -36,7 +36,7 @@ href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
   
 body{
   
-  min-height:100vh;background:#000;color:var(--text);
+  min-height:100vh;background:var(--body-bg,#000);color:var(--text);
   
   font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif
   
@@ -88,6 +88,27 @@ button{cursor:pointer}
   
 }
   
+
+.settings-icon-btn{width:36px;height:36px;padding:0;border:1px solid var(--border,#29482c);border-radius:10px;background:transparent;color:var(--green2,#4caf50);display:inline-flex;align-items:center;justify-content:center;cursor:pointer;transition:.15s}
+.settings-icon-btn:hover{background:rgba(76,175,80,.08);border-color:var(--green2,#4caf50)}
+.settings-icon-btn svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.settings-actions{margin-top:18px}
+.settings-action-row{display:flex;align-items:center;gap:11px;min-height:54px;padding:9px 10px;border:1px solid #244527;border-radius:10px;background:#0d140e;color:inherit;text-decoration:none;margin-top:7px}
+.settings-action-row:hover{border-color:#3f8f50}
+.settings-action-icon{width:30px;height:30px;display:grid;place-items:center;flex:0 0 30px;color:#72bd7b}
+.settings-action-icon svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.settings-action-row strong{display:block;font-size:12px}.settings-action-row small{display:block;color:#9aa59b;font-size:10px;line-height:1.3;margin-top:2px}
+.settings-chevron{margin-left:auto;font-size:20px;color:#78867b}
+.settings-inline-logout{margin-left:auto;border:0;background:transparent;color:#e47b7b;font-size:11px;font-weight:800;padding:7px 3px;cursor:pointer}
+body.light-theme .toast{background:#ffffff;color:#172019;border-color:#176b2c;box-shadow:0 10px 28px rgba(23,107,44,.14)}
+body.light-theme .settings-icon-btn{border-color:#dce5de;color:#176b2c}
+body.light-theme .settings-icon-btn:hover{background:#e8f4ea;border-color:#176b2c}
+body.light-theme .settings-action-row{background:#f8faf8;border-color:#dce5de}
+body.light-theme .settings-action-row:hover{border-color:#72a77a}
+body.light-theme .settings-action-row small{color:#66736a}
+body.light-theme .settings-action-icon{color:#176b2c}
+body.light-theme .settings-chevron{color:#7a887e}
+@media(max-width:430px){.settings-icon-btn{width:34px;height:34px}.settings-action-row{padding:9px 8px}}
 .card{
   
   background:linear-gradient(180deg,#0d120e,#080b08);
@@ -159,15 +180,6 @@ label{display:block;font-size:13px;color:var(--muted);margin:10px 0 6px}
   background:#0b100c
   
 }
-
-.product-meta{margin-top:12px;display:grid;gap:10px}
-.thc-box{border:1px solid #1d4723;border-radius:12px;padding:10px;background:#080d09}
-.thc-row{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:12px}
-.thc-value{font-weight:800;font-size:15px;letter-spacing:.2px}
-.thc-track{height:6px;border-radius:99px;background:#1a241c;overflow:hidden;margin-top:8px}
-.thc-fill{height:100%;border-radius:99px;background:linear-gradient(90deg,#4f9d5a,#8bd48f);transition:width .25s ease}
-.effect-tags{display:flex;flex-wrap:wrap;gap:6px}
-.effect-tag{display:inline-flex;align-items:center;min-height:24px;padding:3px 8px;border-radius:999px;background:#122518;border:1px solid #234b27;color:#bde8c1;font-size:11px;font-weight:600}
   
 .product img{
   
@@ -539,6 +551,415 @@ th{color:#9bd49e}
   
 }
   
+
+  /* ---------- Modern product potency / effects ---------- */
+  .product-potency{margin:11px 0 12px;padding-top:10px;border-top:1px solid #18271a}
+  .product-potency-head{display:flex;align-items:baseline;justify-content:space-between;gap:10px}
+  .product-potency-label{font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:800}
+  .product-thc{font-size:16px;font-weight:900;color:var(--text);white-space:nowrap}
+  .product-thc strong{color:var(--green);font-size:18px}
+  .potency-scale{height:4px;background:#202a21;border-radius:99px;overflow:hidden;margin-top:7px}
+  .potency-fill{height:100%;background:var(--green);border-radius:99px}
+  .potency-range{display:flex;justify-content:space-between;margin-top:4px;font-size:9px;color:#667168}
+  .product-effects{margin-top:10px}
+  .product-effects-label{font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:800;margin-bottom:6px}
+  .effect-list{display:flex;gap:5px;flex-wrap:wrap}
+  .effect-tag{display:inline-flex;align-items:center;padding:5px 8px;border:1px solid #29482c;border-radius:7px;background:#0d140e;color:#c8d2c9;font-size:11px;font-weight:650;line-height:1}
+  .admin-potency{margin-top:6px;font-size:11px;color:#9bd49e}
+  .admin-effects{display:flex;gap:4px;flex-wrap:wrap;margin-top:6px}
+  .admin-effect-tag{font-size:9px;padding:3px 6px;border:1px solid #29482c;border-radius:5px;color:#aeb9b0;background:#0c120d}
+  @media(max-width:520px){.product-thc{font-size:15px}.product-thc strong{font-size:17px}}
+
+  /* ---------- Product display views ---------- */
+  .product-view-toolbar{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-top:12px}
+  .product-view-label{font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:800;margin-right:2px}
+  .product-view-btn{min-height:32px;padding:6px 10px;border:1px solid #29482c;border-radius:8px;background:#0b110c;color:#aeb9b0;font-size:11px;font-weight:800;cursor:pointer;transition:.15s ease}
+  .product-view-btn:hover{border-color:#3b7140;color:#d7e1d8}
+  .product-view-btn.active{background:#143619;border-color:#4b9852;color:#b9e8bd;box-shadow:0 0 0 1px rgba(91,170,96,.12) inset}
+  /* ---------- List view: clean horizontal product row ---------- */
+  #productsList.product-view-list{display:flex;flex-direction:column;gap:9px}
+  #productsList.product-view-list .product{display:grid;grid-template-columns:82px minmax(0,1fr) 112px;grid-template-rows:auto auto auto;align-items:center;column-gap:12px;row-gap:4px;padding:10px 12px;min-width:0}
+  #productsList.product-view-list .product-image-wrap{grid-column:1;grid-row:1 / span 3;width:82px;height:82px;margin:0;border-radius:10px}
+  #productsList.product-view-list .product h3{grid-column:2;grid-row:1;margin:0;font-size:15px;line-height:1.2;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  #productsList.product-view-list .product p.muted{grid-column:2;grid-row:2;min-height:0;margin:0;font-size:11px;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+  #productsList.product-view-list .product .product-potency{grid-column:2;grid-row:3;margin:1px 0 0;padding-top:2px;border-top:0;min-width:0;width:100%;overflow:hidden}
+  #productsList.product-view-list .product .product-potency-head{justify-content:flex-start;gap:8px;margin-bottom:4px}
+  #productsList.product-view-list .product .product-potency-label{font-size:9px}
+  #productsList.product-view-list .product .product-thc{font-size:13px}
+  #productsList.product-view-list .product .product-thc strong{font-size:15px}
+  #productsList.product-view-list .product .potency-scale{height:3px;margin-top:0}
+  #productsList.product-view-list .product .potency-range{display:none}
+  #productsList.product-view-list .product-effects{display:flex;align-items:center;gap:6px;min-width:0;width:100%;margin-top:5px;overflow:hidden}
+  #productsList.product-view-list .product-effects-label{flex:0 0 auto;margin:0;font-size:8px}
+  #productsList.product-view-list .effect-list{display:flex;align-items:center;flex-wrap:nowrap;gap:4px;min-width:0;width:100%;white-space:nowrap;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;padding:1px 0 2px}
+  #productsList.product-view-list .effect-list::-webkit-scrollbar{display:none}
+  #productsList.product-view-list .effect-tag{display:inline-flex;align-items:center;flex:0 0 auto;padding:3px 5px;border:1px solid #29482c;border-radius:5px;background:#0d140e;color:#c8d2c9;font-size:9px;font-weight:650;line-height:1;white-space:nowrap}
+  #productsList.product-view-list .product > div:last-child{grid-column:3;grid-row:1 / span 3;min-width:0;width:100%;display:flex!important;flex-direction:column;align-items:stretch;justify-content:center;gap:7px!important;margin:0!important}
+  #productsList.product-view-list .product > div:last-child .price{text-align:right;font-size:16px;white-space:nowrap}
+  #productsList.product-view-list .product > div:last-child .btn{width:100%}
+  #productsList.product-view-compact{grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:9px}
+  #productsList.product-view-compact .product{padding:10px}
+  #productsList.product-view-compact .product-image-wrap{aspect-ratio:1/1}
+  #productsList.product-view-compact .product h3{font-size:14px;margin-top:9px}
+  #productsList.product-view-compact .product p.muted{font-size:11px;min-height:30px}
+  #productsList.product-view-compact .product .product-potency{margin-top:8px;padding-top:8px}
+  #productsList.product-view-compact .product .product-thc{font-size:14px}
+  #productsList.product-view-compact .product .product-thc strong{font-size:16px}
+  #productsList.product-view-compact .product .effect-tag{padding:4px 6px;font-size:10px}
+  #productsList.product-view-compact .product > div:last-child{margin-top:8px!important}
+  @media(max-width:650px){
+    #productsList.product-view-list .product{grid-template-columns:64px minmax(0,1fr) 88px;column-gap:9px;padding:9px 10px}
+    #productsList.product-view-list .product-image-wrap{width:64px;height:64px}
+    #productsList.product-view-list .product h3{font-size:14px}
+    #productsList.product-view-list .product p.muted{font-size:10px}
+    #productsList.product-view-list .product > div:last-child{grid-column:3;grid-row:1 / span 3;min-width:0;display:flex!important;flex-direction:column!important;align-items:stretch;justify-content:center;gap:6px!important}
+    #productsList.product-view-list .product > div:last-child .price{text-align:right;font-size:13px}
+    #productsList.product-view-list .product > div:last-child .btn{width:100%;padding:7px 8px;font-size:11px}
+    #productsList.product-view-list .product-effects-label{font-size:7px}
+    #productsList.product-view-list .effect-tag{font-size:8px;padding:3px 4px}
+  }
+
+/* ---------- Appearance / Theme ---------- */
+body.light-theme{
+  --body-bg:#f5f7f4;
+  --bg:#f5f7f4;
+  --panel:#ffffff;
+  --panel2:#f8faf8;
+  --line:#cfe0d2;
+  --green:#176b2c;
+  --green2:#3f8f50;
+  --text:#172019;
+  --muted:#66736a;
+  --shadow:0 14px 38px rgba(31,55,37,.12);
+  background:var(--body-bg);
+}
+body.light-theme .brand small{color:#66736a}
+body.light-theme .card{background:linear-gradient(180deg,#fff,#f8faf8);border-color:#cfe0d2;box-shadow:var(--shadow)}
+body.light-theme .btn.secondary{background:#eef3ef;color:#172019;border-color:#c8d7cb}
+body.light-theme .btn.danger{background:#c93636;color:#fff}
+body.light-theme input,body.light-theme textarea,body.light-theme select{background:#fff;color:#172019;border-color:#b9ccbD}
+body.light-theme input::placeholder,body.light-theme textarea::placeholder{color:#89958d}
+body.light-theme .product{background:#fff;border-color:#cfe0d2;box-shadow:0 7px 20px rgba(31,55,37,.06)}
+body.light-theme .product-image-wrap{background:#f0f4f0;border-color:#d2dfd4}
+body.light-theme .product-potency{border-top:0;padding-top:4px;margin-top:5px}
+body.light-theme .product-potency-label,body.light-theme .product-effects-label{color:#176b2c}
+body.light-theme .product-thc{color:#176b2c}
+body.light-theme .product-thc strong{color:#176b2c}
+body.light-theme .potency-scale{background:#dce9df}
+body.light-theme .potency-range{color:#6b7b70}
+body.light-theme .product-effects{margin-top:7px}
+body.light-theme .effect-tag{background:#e8f4ea;border-color:#b9d6be;color:#176b2c}
+body.light-theme .product-image-fallback{background:#e8f4ea;border-color:#b8d5bc}
+body.light-theme .order,body.light-theme .stat,body.light-theme .location-box,body.light-theme .payment-method-box{background:#fff;border-color:#cfe0d2}
+body.light-theme .status{background:#e9f2ea;color:#256333}
+body.light-theme .status.pending{background:#fff4d6;color:#8a6500}
+body.light-theme .status.delivered{background:#e3f3e6;color:#256333}
+body.light-theme .divider{background:#dce6de}
+body.light-theme #calcDisplay{background:#fff;color:#172019;border-color:#b9ccbD}
+body.light-theme .calcBtns button{background:#e8f4ea;color:#174d25;border:1px solid #c5dcc9}
+body.light-theme .bubble{background:#eef3ef;color:#172019;border-color:#c8d8cb}
+body.light-theme .chat{background:rgba(20,30,22,.46)}
+body.light-theme .chat-box{background:#fff;border-color:#3f8f50}
+body.light-theme .chat-input{background:#f5f7f4;border-color:#dce6de}
+body.light-theme .location-box{background:#f8faf8}
+body.light-theme .payment-option label{background:#fff;color:#172019;border-color:#c4d5c8}
+body.light-theme .payment-option input:checked + label{background:#e8f4ea;border-color:#3f8f50;box-shadow:0 0 0 1px #3f8f50 inset}
+body.light-theme .product-view-toolbar{background:#edf3ee;border-color:#cfddd1}
+body.light-theme .product-view-btn{color:#49604f;background:transparent}
+body.light-theme .product-view-btn.active{background:#176b2c;color:#fff}
+body.light-theme .settings-card{background:#fff;border-color:#cfe0d2}
+body.light-theme .theme-option{background:#f8faf8;border-color:#d0ded2;color:#25352a}
+body.light-theme .theme-option.active{background:#e8f4ea;border-color:#3f8f50;color:#176b2c}
+body.light-theme .theme-option small{color:#66736a}
+/* Account security */
+.security-row{display:flex;align-items:center;gap:12px}
+.security-row .settings-action-icon{flex:0 0 30px}
+.password-modal{width:min(440px,100%);margin:0}
+.password-modal .settings-card{padding:20px}
+.password-field{position:relative}
+.password-field input{padding-right:48px}
+.password-toggle{position:absolute;right:8px;bottom:7px;width:34px;height:34px;border:0;border-radius:8px;background:transparent;color:var(--muted);cursor:pointer;display:grid;place-items:center}
+.password-toggle:hover{background:rgba(76,175,80,.08);color:var(--green)}
+.password-toggle svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.password-rules{margin:10px 0 0;padding:10px 11px;border:1px solid #244527;border-radius:10px;background:#0d140e}
+.password-rule{display:flex;align-items:center;gap:7px;font-size:11px;color:#9aa59b;line-height:1.5}
+.password-rule+.password-rule{margin-top:4px}
+.password-rule i{width:14px;height:14px;border-radius:50%;border:1px solid #536158;display:grid;place-items:center;font-style:normal;font-size:9px;flex:0 0 14px}
+.password-rule.ok{color:#78c982}.password-rule.ok i{border-color:#3f8f50;background:#176b2c;color:#fff}
+.password-match{font-size:11px;margin-top:6px;min-height:16px}.password-match.ok{color:#55b965}.password-match.bad{color:#d96d6d}
+body.light-theme .password-rules{background:#f8faf8;border-color:#d0ded2}
+body.light-theme .password-rule{color:#66736a}
+body.light-theme .password-rule.ok{color:#176b2c}
+body.light-theme .password-toggle:hover{background:#e8f4ea}
+.password-divider{height:1px;background:#1c2d1f;margin:15px 0}
+body.light-theme .password-divider{background:#dce6de}
+
+.settings-modal{width:min(430px,100%);max-width:100%;height:min(100dvh,100vh);max-height:100dvh;margin:0;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;border-radius:18px}.settings-card{padding:20px}
+#settingsModal{align-items:stretch;justify-content:center;overflow:hidden;padding:12px}
+#settingsModal .settings-modal{width:min(430px,100%);flex:0 1 auto}
+#changePasswordModal{z-index:5100}
+#changePasswordModal .password-modal{max-height:calc(100dvh - 24px);overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+body.modal-scroll-lock{overflow:hidden!important;touch-action:none}
+@media(max-width:520px){#settingsModal{padding:0}#settingsModal .settings-modal{width:100%;height:100dvh;max-height:100dvh;border-radius:0;padding:18px 16px 28px}.settings-modal .settings-head{position:sticky;top:0;z-index:2;background:inherit;padding-top:2px;padding-bottom:14px}.settings-section:last-of-type{padding-bottom:10px}}
+.settings-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:16px}
+.theme-options{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:9px}
+.theme-option{border:1px solid #2d5d32;border-radius:12px;padding:12px 8px;background:#0b100c;color:#fff;text-align:center;font-weight:800;transition:.15s}
+.theme-option.active{background:#143619;border-color:#4caf50;color:#81c784;box-shadow:0 0 0 1px #4caf50 inset}
+.theme-option .theme-icon{display:block;font-size:21px;margin-bottom:5px}
+.theme-option small{display:block;margin-top:3px;font-size:10px;color:#9aa59b;font-weight:600}
+@media(max-width:430px){.theme-options{grid-template-columns:1fr 1fr 1fr}.theme-option{padding:10px 5px;font-size:12px}}
+
+
+.settings-section{margin-top:16px;padding-top:15px;border-top:1px solid #1c2d1f}
+.settings-section-title{font-size:13px;font-weight:850;margin-bottom:9px}
+.settings-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 11px;border:1px solid #244527;border-radius:11px;background:#0d140e}
+.settings-row strong{display:block;font-size:12px}
+.settings-row small{display:block;color:#9aa59b;font-size:10px;line-height:1.35;margin-top:3px}
+.settings-select{min-width:96px;border:1px solid #315d35;border-radius:8px;background:#111912;color:#fff;padding:8px 9px;font-size:11px;font-weight:750}
+.settings-switch{position:relative;width:46px;height:26px;flex:0 0 46px;border:1px solid #315d35;border-radius:99px;background:#28352a;padding:2px;cursor:pointer}
+.settings-switch span{display:block;width:20px;height:20px;border-radius:50%;background:#aeb8b0;transition:.18s}
+.settings-switch[aria-pressed="true"]{background:#176b2c;border-color:#3f8f50}
+.settings-switch[aria-pressed="true"] span{transform:translateX(19px);background:#fff}
+.settings-reset{width:100%;margin-top:16px}
+body.light-theme .settings-section{border-color:#dce6de}
+body.light-theme .settings-row{background:#f8faf8;border-color:#d0ded2}
+body.light-theme .settings-row small{color:#66736a}
+body.light-theme .settings-select{background:#fff;color:#172019;border-color:#b9ccbd}
+body.light-theme .settings-switch{background:#d5ddd7;border-color:#c0cec3}
+body.light-theme .settings-switch[aria-pressed="true"]{background:#176b2c;border-color:#3f8f50}
+@media(max-width:430px){.settings-row{align-items:flex-start}.settings-select{min-width:86px}.settings-row>div{min-width:0}}
+
+/* ---------- Admin light theme polish ---------- */
+body.light-theme #adminSessionsTab .session-card,
+body.light-theme .session-card{background:#fff !important;border:1px solid #d7e3da !important;box-shadow:0 6px 18px rgba(31,55,37,.06);color:#172019}
+body.light-theme .session-meta{color:#172019}
+body.light-theme .session-meta span{color:#66736a}
+body.light-theme .session-status{background:#eef3ef;color:#3b5141}
+body.light-theme .session-status.active{background:#e5f4e8;color:#176b2c}
+body.light-theme .session-status.inactive{background:#fff5dc;color:#866200}
+body.light-theme .session-status.revoked{background:#fdeaea;color:#a12f2f}
+body.light-theme #adminSessionsList,
+body.light-theme #adminProductsList{color:#172019}
+body.light-theme #adminProductsList .order{background:#fff !important;border:1px solid #d7e3da !important;box-shadow:0 6px 18px rgba(31,55,37,.05)}
+body.light-theme #adminProductsList .order > div:first-child{background:#f1f6f2 !important;border:1px solid #d7e3da !important}
+body.light-theme #adminProductsList .order strong{color:#172019}
+body.light-theme #adminProductsList .admin-potency{color:#176b2c !important}
+body.light-theme #adminProductsList .admin-effect-tag{background:#e8f4ea !important;border-color:#c5dcc9 !important;color:#245d30 !important}
+body.light-theme #adminProductsList .btn.secondary,
+body.light-theme #adminSessionsList .btn.secondary{background:#eef3ef !important;color:#172019 !important;border:1px solid #c8d7cb !important}
+body.light-theme #adminSessionsList .btn.danger{background:#c93636 !important;color:#fff !important}
+body.light-theme #adminSessionsTab .row,
+body.light-theme #adminProductsTab .row{gap:8px}
+@media(max-width:620px){
+  body.light-theme .session-grid{grid-template-columns:1fr}
+  body.light-theme #adminProductsList .order{align-items:flex-start !important}
+  body.light-theme #adminProductsList .order > div:nth-child(2){min-width:0 !important;width:calc(100% - 88px)}
+  body.light-theme #adminProductsList .order > div:last-child{width:100%;padding-left:88px}
+}
+
+/* ---------- Admin product editor light-theme cleanup ---------- */
+body.light-theme #adminProductsTab .form-shell{
+  background:#f8faf8 !important;
+  border:1px solid #d3e0d6 !important;
+  box-shadow:0 8px 24px rgba(31,55,37,.05);
+}
+body.light-theme #adminProductsTab .field label{color:#34453a !important;font-weight:750}
+body.light-theme #adminProductsTab .field .muted{color:#718078 !important}
+body.light-theme #adminProductsTab input,
+body.light-theme #adminProductsTab textarea,
+body.light-theme #adminProductsTab select{
+  background:#fff !important;
+  color:#172019 !important;
+  border-color:#c3d2c7 !important;
+  box-shadow:none !important;
+}
+body.light-theme #adminProductsTab input:focus,
+body.light-theme #adminProductsTab textarea:focus,
+body.light-theme #adminProductsTab select:focus{
+  border-color:#3f8f50 !important;
+  box-shadow:0 0 0 3px rgba(63,143,80,.10) !important;
+}
+body.light-theme #adminProductsTab input[type=file]{
+  background:#fff !important;
+  color:#34453a !important;
+  border:1px solid #c3d2c7 !important;
+  padding:9px !important;
+}
+body.light-theme #adminProductsTab input[type=file]::file-selector-button{
+  background:#e8f4ea;
+  color:#176b2c;
+  border:1px solid #b9d5bd;
+  border-radius:8px;
+  padding:7px 10px;
+  margin-right:9px;
+  font-weight:750;
+  cursor:pointer;
+}
+body.light-theme #adminProductsTab #adminProductImagePreview > div{
+  background:#f1f5f2 !important;
+  border-color:#cbd9cf !important;
+}
+body.light-theme #adminProductsTab .form-actions{
+  border-top:1px solid #dce6de;
+  padding-top:14px;
+}
+body.light-theme #adminProductsTab .form-actions .btn.secondary{
+  background:#fff !important;
+  color:#34453a !important;
+  border-color:#c3d2c7 !important;
+}
+body.light-theme #adminProductsTab .form-actions .btn.secondary:hover{
+  background:#f1f6f2 !important;
+}
+body.light-theme #adminProductsTab > .card h2{color:#172019}
+body.light-theme #adminProductsTab > .card > p.muted{color:#68776e !important}
+
+/* ---------- Premium theme polish ---------- */
+body.light-theme .footer{background:#fff;border-top-color:#dce5de;color:#176b2c;padding:30px 0 10px;border-radius:0;margin-top:35px}
+body.light-theme .footer h3,body.light-theme .footer h4{color:#176b2c}
+body.light-theme .footer p{color:#176b2c}
+body.light-theme .footer a{color:#176b2c}
+body.light-theme .footer a:hover{color:#0d4a1c}
+body.light-theme .footer-bottom{border-top-color:#dce5de;color:#176b2c}
+body.light-theme .settings-card{background:#fff;border:1px solid #d8e3da;border-radius:14px;box-shadow:0 12px 30px rgba(23,60,31,.10);padding:16px}
+.settings-head{padding-bottom:13px;border-bottom:1px solid #1c2d1f;display:flex;align-items:center;justify-content:space-between;gap:12px}
+body.light-theme .settings-head{border-bottom-color:#e1e8e2}
+.theme-options{grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}
+.theme-option{border:1px solid #294b2e;border-radius:10px;padding:11px 8px;background:#101711;color:#dce7de;text-align:left;font-weight:750;transition:background .15s,border-color .15s,transform .15s;box-shadow:none}
+.theme-option:hover{transform:translateY(-1px)}
+.theme-option.active{background:#183b1d;border-color:#4caf50;color:#a9e3af;box-shadow:inset 0 0 0 1px #3d8f48}
+.theme-option .theme-icon{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:7px;background:#18231a;font-size:0;margin:0 0 7px}.theme-option .theme-icon svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.theme-option small{font-size:9.5px;color:#8f9d92;font-weight:600}
+body.light-theme .theme-option{background:#f8faf8;border-color:#d6e2d8;color:#26362a}
+body.light-theme .theme-option.active{background:#e9f5eb;border-color:#3b8d4b;color:#176b2c}
+body.light-theme .theme-option .theme-icon{background:#edf4ee}
+body.light-theme .theme-option small{color:#68766d}
+.settings-section{margin-top:14px;padding-top:14px}
+.settings-section-title{display:flex;align-items:center;gap:7px;font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:#8ea291;margin-bottom:8px}.settings-section-title svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:0 0 14px}
+body.light-theme .settings-section-title{color:#65746a}
+body.light-theme #settingsModal .form-note{color:#176b2c;background:#f7faf7;border-color:#d9e4db}
+.settings-row{border-radius:10px;padding:11px 12px;min-height:50px}
+body.light-theme .settings-row{background:#f8faf8;border-color:#d9e4db;color:#172019}
+body.light-theme .settings-row small{color:#6d7a72}
+body.light-theme .settings-select{background:#fff;color:#172019;border-color:#c8d8cc}
+body.light-theme .settings-switch{background:#dce5de;border-color:#c5d4c9}
+body.light-theme .settings-switch span{background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.16)}
+@media(max-width:430px){.theme-option{padding:9px 7px}.theme-option .theme-icon{width:24px;height:24px}.settings-card{padding:15px}}
+
+
+/* ---------- Settings screen: production mobile + desktop polish ---------- */
+#settingsModal{
+  align-items:center!important;
+  justify-content:center!important;
+  padding:20px!important;
+  background:rgba(0,0,0,.78);
+}
+#settingsModal .settings-modal{
+  width:min(480px,100%)!important;
+  height:min(760px,calc(100dvh - 40px))!important;
+  max-height:calc(100dvh - 40px)!important;
+  padding:0!important;
+  margin:0!important;
+  overflow:hidden!important;
+  border-radius:20px!important;
+  display:flex;
+  flex-direction:column;
+}
+#settingsModal .settings-head{
+  flex:0 0 auto;
+  margin:0!important;
+  padding:18px 20px 15px!important;
+  border-bottom:1px solid #1c2d1f!important;
+  background:inherit;
+}
+#settingsModal .settings-head h2{margin:0;font-size:19px;line-height:1.2}
+#settingsModal .settings-head .muted{font-size:11px!important;line-height:1.35}
+#settingsModal .settings-close{
+  width:34px;height:34px;padding:0!important;display:grid;place-items:center;flex:0 0 34px;
+  border-radius:10px!important;font-size:20px;line-height:1;
+}
+#settingsModal .settings-modal > label,
+#settingsModal .settings-modal > .theme-options,
+#settingsModal .settings-modal > .form-note,
+#settingsModal .settings-modal > .settings-section,
+#settingsModal .settings-modal > .settings-reset{
+  margin-left:20px;margin-right:20px;
+}
+#settingsModal .settings-modal > label{margin-top:18px}
+#settingsModal .settings-modal > .theme-options{margin-top:9px}
+#settingsModal .settings-modal > .form-note{margin-top:10px}
+#settingsModal .settings-section{margin-top:16px;padding-top:15px}
+#settingsModal .settings-section:first-of-type{margin-top:18px}
+#settingsModal .settings-modal > .settings-reset{margin-top:18px;margin-bottom:20px}
+#settingsModal .settings-action-row{min-height:56px;padding:10px 11px;border-radius:12px}
+#settingsModal .settings-row{min-height:54px;border-radius:12px}
+#settingsModal .settings-modal::-webkit-scrollbar{width:6px}
+#settingsModal .settings-modal::-webkit-scrollbar-thumb{background:#29482c;border-radius:99px}
+#settingsModal .settings-modal::-webkit-scrollbar-track{background:transparent}
+
+body.light-theme #settingsModal{background:rgba(20,30,22,.46)}
+body.light-theme #settingsModal .settings-modal{box-shadow:0 22px 60px rgba(23,60,31,.18);border-color:#d8e3da}
+body.light-theme #settingsModal .settings-head{border-bottom-color:#e1e8e2!important}
+
+@media(max-width:520px){
+  #settingsModal{padding:0!important;align-items:stretch!important;justify-content:stretch!important}
+  #settingsModal .settings-modal{
+    width:100%!important;
+    height:100dvh!important;
+    max-height:100dvh!important;
+    border-radius:0!important;
+    border:0!important;
+    box-shadow:none!important;
+  }
+  #settingsModal .settings-head{
+    padding:calc(14px + env(safe-area-inset-top)) 16px 14px!important;
+    min-height:68px;
+    position:relative!important;
+  }
+  #settingsModal .settings-head h2{font-size:18px}
+  #settingsModal .settings-head .muted{font-size:10.5px!important}
+  #settingsModal .settings-close{
+    border-radius:50%!important;
+    font-size:0!important;
+  }
+  #settingsModal .settings-close::before{content:'‹';font-size:27px;line-height:1;font-weight:400;transform:translateY(-1px)}
+  #settingsModal .settings-modal > label,
+  #settingsModal .settings-modal > .theme-options,
+  #settingsModal .settings-modal > .form-note,
+  #settingsModal .settings-modal > .settings-section,
+  #settingsModal .settings-modal > .settings-reset{margin-left:16px;margin-right:16px}
+  #settingsModal .settings-modal > label{margin-top:16px}
+  #settingsModal .settings-section:first-of-type{margin-top:16px}
+  #settingsModal .settings-modal > .settings-reset{margin-bottom:calc(20px + env(safe-area-inset-bottom))}
+}
+
+
+/* ---------- Settings scroll/final behavior fix ---------- */
+#settingsModal .settings-modal{
+  overflow-y:auto!important;
+  overflow-x:hidden!important;
+  display:block!important;
+  -webkit-overflow-scrolling:touch;
+  overscroll-behavior:contain;
+  scrollbar-gutter:stable;
+}
+#settingsModal .settings-head{
+  position:sticky!important;
+  top:0;
+  z-index:5;
+}
+@media(max-width:520px){
+  #settingsModal .settings-modal{
+    height:100dvh!important;
+    max-height:100dvh!important;
+    overflow-y:auto!important;
+    padding-bottom:calc(28px + env(safe-area-inset-bottom))!important;
+  }
+  #settingsModal .settings-head{
+    position:sticky!important;
+    top:0;
+  }
+}
 </style></head><body><section id="unlock">  <div class="card"><div class="center">
 
   <h2 class="green">🌿 Calculator</h2>
@@ -561,9 +982,7 @@ th{color:#9bd49e}
 
 <div class="app-download-wrap">
 
-  <a class="btn small app-download" href="https://github.com/thecyzardpro/KhaluculatorV1/releases/download/app-v1.0.0/KhaluCulator.apk" download="KhaluCulator.apk" aria-label="Download Green Store Android App">📱 Download App</a>
-
-  <div id="userHeader" class="hidden" style="display:flex;align-items:center;gap:9px;margin-left:auto"><span id="userNameDisplay" class="green" style="font-weight:800"></span><button class="btn danger small" id="logoutBtn">Logout</button></div>
+  <div id="userHeader" class="hidden" style="display:flex;align-items:center;gap:9px;margin-left:auto"><span id="userNameDisplay" class="green" style="font-weight:800"></span><button class="settings-icon-btn" id="settingsBtn" type="button" aria-label="Open settings" title="Settings"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 8.4a3.6 3.6 0 1 0 0 7.2 3.6 3.6 0 0 0 0-7.2Z"/><path d="m19.1 13.4 1.3 1-.9 1.6-1.5-.6a7.8 7.8 0 0 1-1.9 1.1l-.2 1.6h-1.9l-.3-1.6a7.8 7.8 0 0 1-1.9-1.1l-1.5.6-.9-1.6 1.3-1a7.2 7.2 0 0 1 0-2.8l-1.3-1 .9-1.6 1.5.6a7.8 7.8 0 0 1 1.9-1.1l.3-1.6h1.9l.2 1.6a7.8 7.8 0 0 1 1.9 1.1l1.5-.6.9 1.6-1.3 1a7.2 7.2 0 0 1 0 2.8Z"/></svg></button></div>
 
 </div>
 
@@ -727,12 +1146,19 @@ th{color:#9bd49e}
 
   <div class="card">
 
-    <div style="display:flex;justify-content:space-between;gap:10px;align-items:center">
+    <div style="display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap">
 
       <h2>Available Products</h2>
 
-      <span class="muted">All prices in TSH</span>
+      <span class="muted" id="priceCurrencyLabel">All prices in TSH</span>
 
+    </div>
+
+    <div class="product-view-toolbar" aria-label="Product display view">
+      <span class="product-view-label">View</span>
+      <button type="button" class="product-view-btn active" data-product-view="grid" onclick="setProductView('grid')">Grid</button>
+      <button type="button" class="product-view-btn" data-product-view="list" onclick="setProductView('list')">List</button>
+      <button type="button" class="product-view-btn" data-product-view="compact" onclick="setProductView('compact')">Compact</button>
     </div>
 
     <div id="productsList" class="grid" style="margin-top:14px"></div>
@@ -987,14 +1413,14 @@ th{color:#9bd49e}
 
       <div class="field">
         <label for="adminProductThc">THC potency (%)</label>
-        <input id="adminProductThc" type="number" min="0" max="100" step="0.1" inputmode="decimal" placeholder="e.g. 22.5">
-        <div class="muted" style="font-size:11px;margin-top:5px">Enter a verified lab value from 0 to 100.</div>
+        <input id="adminProductThc" type="number" min="0" max="100" step="0.1" inputmode="decimal" placeholder="e.g. 32.9">
+        <div class="muted" style="font-size:11px;margin-top:5px">Enter a value from 0 to 100.</div>
       </div>
 
       <div class="field">
         <label for="adminProductEffects">Effects</label>
-        <input id="adminProductEffects" maxlength="300" placeholder="e.g. Relaxed, Happy, Focused">
-        <div class="muted" style="font-size:11px;margin-top:5px">Separate effects with commas.</div>
+        <input id="adminProductEffects" maxlength="500" placeholder="Relaxed, Euphoric, Creative">
+        <div class="muted" style="font-size:11px;margin-top:5px">Separate each effect with a comma.</div>
       </div>
 
 
@@ -1061,7 +1487,102 @@ th{color:#9bd49e}
 
 <div class="footer-bottom"><span>© 2026 WALAKAYA. All rights reserved.</span><span>Green Store · Secure Digital Commerce</span></div>
 
-  </footer></main><div id="depositModal" class="chat hidden">  <div class="card" style="width:min(470px,100%);margin:0"><div style="display:flex;justify-content:space-between;align-items:center;gap:10px"><div class="form-title"><div class="form-icon">💰</div><div><h2>Deposit Wallet</h2><div class="muted" style="font-size:11px">Create a payment verification request</div></div></div><button class="btn secondary small" id="closeDeposit">✕</button></div>
+  </footer></main><div id="changePasswordModal" class="chat hidden" role="dialog" aria-modal="true" aria-labelledby="changePasswordTitle">
+  <div class="card password-modal settings-card">
+    <div class="settings-head">
+      <div><h2 id="changePasswordTitle">Change password</h2><div class="muted" style="font-size:12px;margin-top:4px">Update your account password securely.</div></div>
+      <button class="btn secondary small" id="closeChangePassword" type="button" aria-label="Close">×</button>
+    </div>
+
+    <label for="currentPasswordSettings">Current password</label>
+    <div class="password-field"><input id="currentPasswordSettings" type="password" autocomplete="current-password" placeholder="Enter current password"><button class="password-toggle" type="button" data-password-target="currentPasswordSettings" aria-label="Show current password"></button></div>
+
+    <div class="password-divider"></div>
+
+    <label for="newPasswordSettings">New password</label>
+    <div class="password-field"><input id="newPasswordSettings" type="password" autocomplete="new-password" placeholder="Create a strong password"><button class="password-toggle" type="button" data-password-target="newPasswordSettings" aria-label="Show new password"></button></div>
+
+    <div class="password-rules" aria-live="polite">
+      <div class="password-rule" data-password-rule="length"><i>✓</i><span>At least 8 characters</span></div>
+      <div class="password-rule" data-password-rule="upper"><i>✓</i><span>One uppercase letter</span></div>
+      <div class="password-rule" data-password-rule="lower"><i>✓</i><span>One lowercase letter</span></div>
+      <div class="password-rule" data-password-rule="number"><i>✓</i><span>One number</span></div>
+      <div class="password-rule" data-password-rule="symbol"><i>✓</i><span>One symbol</span></div>
+    </div>
+
+    <label for="confirmPasswordSettings">Confirm new password</label>
+    <div class="password-field"><input id="confirmPasswordSettings" type="password" autocomplete="new-password" placeholder="Repeat new password"><button class="password-toggle" type="button" data-password-target="confirmPasswordSettings" aria-label="Show confirmation password"></button></div>
+    <div id="passwordMatchSettings" class="password-match"></div>
+
+    <button class="btn" style="width:100%;margin-top:13px" id="changePasswordSubmit" type="button">Update password</button>
+    <button class="btn secondary" style="width:100%;margin-top:8px" id="cancelChangePassword" type="button">Cancel</button>
+  </div>
+</div>
+<div id="settingsModal" class="chat hidden" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
+  <div class="card settings-modal settings-card">
+    <div class="settings-head">
+      <div><h2 id="settingsTitle">Settings</h2><div class="muted" style="font-size:12px;margin-top:4px">Customize how KhaluCulator looks on your device.</div></div>
+      <button class="btn secondary small settings-close" id="closeSettings" type="button" aria-label="Close settings">×</button>
+    </div>
+    <label style="margin-top:0">Appearance</label>
+    <div class="theme-options" role="group" aria-label="Appearance theme">
+      <button class="theme-option" type="button" data-theme-choice="dark"><span class="theme-icon"><svg viewBox="0 0 24 24"><path d="M20 15.5A8.5 8.5 0 0 1 8.5 4 8.5 8.5 0 1 0 20 15.5Z"/></svg></span>Dark<small>Always dark</small></button>
+      <button class="theme-option" type="button" data-theme-choice="light"><span class="theme-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></span>Light<small>Clean & bright</small></button>
+      <button class="theme-option" type="button" data-theme-choice="system"><span class="theme-icon"><svg viewBox="0 0 24 24"><rect x="5" y="2.5" width="14" height="19" rx="2.5"/><path d="M10 18.5h4"/></svg></span>System<small>Follow phone</small></button>
+    </div>
+    <div class="form-note" style="margin-top:14px">Your choice is saved on this device. System mode follows your phone's light/dark setting automatically.</div>
+
+    <div class="settings-section">
+      <div class="settings-section-title"><svg viewBox="0 0 24 24"><path d="M12 3v18M16 7.5c0-1.7-1.6-3-4-3s-4 1.1-4 3 1.2 2.5 4 3.2 4 1.5 4 3.2-1.6 3-4 3-4-1.3-4-3"/></svg>Currency display</div>
+      <div class="settings-row"><div><strong>Currency label</strong><small>Changes displayed currency instantly. Store values remain stored in TSH; USD uses the latest available exchange rate.</small></div><select id="settingsCurrency" class="settings-select"><option value="TSH">TSH — Tanzanian Shilling</option><option value="TZS">TZS — Tanzanian Shilling</option><option value="USD">USD — US Dollar</option></select></div>
+    </div>
+
+    <div class="settings-section">
+      <div class="settings-section-title"><svg viewBox="0 0 24 24"><rect x="4" y="2.5" width="16" height="19" rx="2"/><path d="M7.5 6.5h9M8 11h.01M12 11h.01M16 11h.01M8 15h.01M12 15h.01M16 15h.01M8 19h.01M12 19h.01M16 19h.01"/></svg>Calculator</div>
+      <div class="settings-row"><div><strong>Decimal display</strong><small>Choose how many decimal places are shown.</small></div><select id="settingsDecimals" class="settings-select"><option value="auto">Auto</option><option value="0">0</option><option value="2">2</option><option value="4">4</option></select></div>
+    </div>
+
+    <div class="settings-section">
+      <div class="settings-section-title"><svg viewBox="0 0 24 24"><path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"/></svg>Notifications</div>
+      <div class="settings-row"><div><strong>In-app notifications</strong><small>Controls notification preferences on this device.</small></div><button type="button" class="settings-switch" id="settingsNotifications" aria-pressed="true"><span></span></button></div>
+    </div>
+
+    <div class="settings-section">
+      <div class="settings-section-title"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="6" height="6" rx="1"/><rect x="14" y="4" width="6" height="6" rx="1"/><rect x="4" y="14" width="6" height="6" rx="1"/><rect x="14" y="14" width="6" height="6" rx="1"/></svg>Product view</div>
+      <div class="settings-row"><div><strong>Default view</strong><small>Choose how products appear when you open the store.</small></div><select id="settingsProductView" class="settings-select"><option value="grid">Grid</option><option value="list">List</option><option value="compact">Compact</option></select></div>
+    </div>
+
+    <div class="settings-section">
+      <div class="settings-section-title"><svg viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>Security</div>
+      <button class="settings-action-row" id="openChangePasswordBtn" type="button" aria-label="Change password">
+        <span class="settings-action-icon"><svg viewBox="0 0 24 24"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/><path d="M12 14v2"/></svg></span>
+        <span><strong>Change password</strong><small>Verify your current password and choose a new one.</small></span>
+        <span class="settings-chevron">›</span>
+      </button>
+    </div>
+
+    <div class="settings-section settings-actions">
+      <div class="settings-section-title">App</div>
+      <a class="settings-action-row" href="https://github.com/thecyzardpro/KhaluculatorV1/releases/download/app-v1.0.0/KhaluCulator.apk" download="KhaluCulator.apk" aria-label="Download KhaluCulator Android App">
+        <span class="settings-action-icon"><svg viewBox="0 0 24 24"><path d="M12 3v11"/><path d="m7.5 10 4.5 4.5 4.5-4.5"/><path d="M5 19h14"/></svg></span>
+        <span><strong>Download App</strong><small>Install KhaluCulator on your Android device.</small></span>
+        <span class="settings-chevron">›</span>
+      </a>
+      <div class="settings-action-row settings-logout-row">
+        <span class="settings-action-icon"><svg viewBox="0 0 24 24"><path d="M10 4H5.5A1.5 1.5 0 0 0 4 5.5v13A1.5 1.5 0 0 0 5.5 20H10"/><path d="M13 8l4 4-4 4"/><path d="M17 12H8"/></svg></span>
+        <span><strong>Logout</strong><small>Sign out of this account on this device.</small></span>
+        <button class="settings-inline-logout" id="logoutBtn" type="button" aria-label="Logout">Logout</button>
+      </div>
+    </div>
+
+    <div class="settings-section settings-about">
+      <div class="settings-section-title"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 10v6M12 7h.01"/></svg>About KhaluCulator</div>
+      <p class="muted" style="font-size:12px;line-height:1.55;margin:0">KhaluCulator is a calculator and secure digital marketplace experience. Your appearance and device preferences are stored locally on this device.</p>
+    </div>
+
+    <button type="button" class="btn secondary settings-reset" id="resetSettingsBtn">↺ Reset settings</button>
+  </div>
+</div><div id="depositModal" class="chat hidden">  <div class="card" style="width:min(470px,100%);margin:0"><div style="display:flex;justify-content:space-between;align-items:center;gap:10px"><div class="form-title"><div class="form-icon">💰</div><div><h2>Deposit Wallet</h2><div class="muted" style="font-size:11px">Create a payment verification request</div></div></div><button class="btn secondary small" id="closeDeposit">✕</button></div>
 
 <div class="form-shell" style="margin-top:14px">
 
@@ -1406,9 +1927,18 @@ const $ = id => document.getElementById(id);
 
   
 function money(value){
-  
-  return "TSH " + Number(value || 0).toLocaleString("en-TZ");
-  
+  const n=Number(value||0);
+  const currency=(window.KHALU_SETTINGS?.getCurrency?.()||localStorage.getItem("khaluculator_currency")||"TSH");
+  const decimals=(window.KHALU_SETTINGS?.getDecimals?.()||localStorage.getItem("khaluculator_decimals")||"auto");
+  let amount=n;
+  if(currency==="USD") amount=n/(Number(window.KHALU_SETTINGS?.getUsdTzsRate?.()||localStorage.getItem("khaluculator_usd_tzs_rate"))||2500);
+  const max=decimals==="auto"?(currency==="USD"?2:0):Number(decimals);
+  return `${currency} ${amount.toLocaleString(currency==="USD"?"en-US":"en-TZ",{minimumFractionDigits:max,maximumFractionDigits:max})}`;
+}
+function formatCalcNumber(value){
+  const n=Number(value); if(!Number.isFinite(n)) return "0";
+  const d=localStorage.getItem("khaluculator_decimals")||"auto";
+  return d==="auto" ? String(Number(n.toFixed(10))) : n.toLocaleString("en-US",{minimumFractionDigits:Number(d),maximumFractionDigits:Number(d)});
 }
   
 
@@ -1563,7 +2093,7 @@ function calcClick(k){
   
       }
   
-      $("calcDisplay").textContent=result;
+      $("calcDisplay").textContent=formatCalcNumber(result);
   
       expression=String(result);
   
@@ -2469,17 +2999,42 @@ function productImageMarkup(product){
   
 
   
+let productView = localStorage.getItem("khaluculator_product_view") || "grid";
+if(!["grid","list","compact"].includes(productView)) productView="grid";
+
+function setProductView(view){
+  if(!["grid","list","compact"].includes(view)) return;
+  productView=view;
+  localStorage.setItem("khaluculator_product_view",view);
+  const list=$("productsList");
+  if(list){
+    list.classList.remove("product-view-list","product-view-compact");
+    if(view==="list") list.classList.add("product-view-list");
+    if(view==="compact") list.classList.add("product-view-compact");
+  }
+  document.querySelectorAll("[data-product-view]").forEach(btn=>{
+    btn.classList.toggle("active",btn.dataset.productView===view);
+  });
+}
+
 function productPotencyMarkup(product){
-  const thc=Number(product?.thc_percent);
-  const pct=Number.isFinite(thc) && thc>=0 ? Math.min(100,Math.max(0,thc)) : null;
-  const effects=String(product?.effects||"").split(",").map(x=>x.trim()).filter(Boolean).slice(0,8);
-  if(pct===null && !effects.length) return "";
-  return `<div class="product-meta">${pct!==null ? `<div class="thc-box"><div class="thc-row"><span class="muted">THC</span><span class="thc-value">${pct}%</span></div><div class="thc-track"><div class="thc-fill" style="width:${pct}%"></div></div></div>` : ""}${effects.length ? `<div><div class="muted" style="font-size:11px;margin-bottom:6px">Effects</div><div class="effect-tags">${effects.map(e=>`<span class="effect-tag">${esc(e)}</span>`).join("")}</div></div>` : ""}</div>`;
+  const raw=Number(product?.thc_percent);
+  const thc=Number.isFinite(raw) && raw>=0 ? Math.min(100,Math.max(0,raw)) : null;
+  const effects=String(product?.effects||"").split(",").map(x=>x.trim()).filter(Boolean).slice(0,12);
+  if(thc===null && !effects.length)return "";
+  const thcText=thc===null ? "" : `${thc%1===0?thc.toFixed(0):thc.toFixed(1)}%`;
+  return `
+    <div class="product-potency">
+      ${thc!==null ? `<div class="product-potency-head"><span class="product-potency-label">THC</span><span class="product-thc"><strong>${thcText}</strong> THC</span></div><div class="potency-scale" aria-label="THC potency ${thcText}"><div class="potency-fill" style="width:${thc}%"></div></div><div class="potency-range"><span>0%</span><span>50%</span><span>100%</span></div>` : ""}
+      ${effects.length ? `<div class="product-effects"><div class="product-effects-label">Effects</div><div class="effect-list">${effects.map(effect=>`<span class="effect-tag">${esc(effect)}</span>`).join("")}</div></div>` : ""}
+    </div>`;
 }
 
 async function loadProducts(silent=false){
   
   const list=$("productsList");
+  
+  setProductView(productView);
   
   if(!silent)
   
@@ -2526,7 +3081,7 @@ async function loadProducts(silent=false){
       <h3>${esc(p.name)}</h3>
   
       <p class="muted" style="min-height:35px">${esc(p.description||"")}</p>
-
+  
       ${productPotencyMarkup(p)}
   
       <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:12px">
@@ -3711,6 +4266,53 @@ async function loadAdminStats(){
   
 
   
+function deliveredOrderChecks(){
+  return [...document.querySelectorAll(".delivered-order-check")];
+}
+
+function updateDeliveredSelectionState(){
+  const checks=deliveredOrderChecks();
+  const selected=checks.filter(c=>c.checked);
+  const btn=$("deleteSelectedDeliveredBtn");
+  if(btn){btn.disabled=selected.length===0;btn.textContent=selected.length?`Delete selected (${selected.length})`:"Delete selected";}
+  const all=$("selectAllDeliveredOrders");
+  if(all){all.checked=checks.length>0&&selected.length===checks.length;all.indeterminate=selected.length>0&&selected.length<checks.length;}
+}
+function toggleAllDeliveredOrders(checked){deliveredOrderChecks().forEach(c=>c.checked=!!checked);updateDeliveredSelectionState();}
+
+async function deleteDeliveredOrder(orderId){
+  if(!orderId||!sb||!currentProfile?.is_admin)return;
+  if(!confirm("Delete this delivered order permanently? This action cannot be undone."))return;
+  try{
+    const {error}=await sb.from("orders").delete().eq("id",orderId).eq("status","delivered");
+    if(error)throw error;
+    toast("Delivered order deleted.");
+    await Promise.all([loadAdminOrders("delivered"),loadAdminStats()]);
+  }catch(e){console.error("Delete delivered order:",e);toast("Could not delete delivered order: "+e.message,true);}
+}
+async function deleteSelectedDeliveredOrders(){
+  if(!sb||!currentProfile?.is_admin)return;
+  const ids=deliveredOrderChecks().filter(c=>c.checked).map(c=>c.value).filter(Boolean);
+  if(!ids.length)return;
+  if(!confirm(`Delete ${ids.length} delivered order${ids.length===1?"":"s"} permanently? This action cannot be undone.`))return;
+  try{
+    const {error}=await sb.from("orders").delete().in("id",ids).eq("status","delivered");
+    if(error)throw error;
+    toast(`${ids.length} delivered order${ids.length===1?"":"s"} deleted.`);
+    await Promise.all([loadAdminOrders("delivered"),loadAdminStats()]);
+  }catch(e){console.error("Delete selected delivered orders:",e);toast("Could not delete selected delivered orders: "+e.message,true);}
+}
+async function deleteAllDeliveredOrders(){
+  if(!sb||!currentProfile?.is_admin)return;
+  if(!confirm("Delete ALL delivered orders permanently? This action cannot be undone."))return;
+  try{
+    const {error}=await sb.from("orders").delete().eq("status","delivered");
+    if(error)throw error;
+    toast("All delivered orders deleted.");
+    await Promise.all([loadAdminOrders("delivered"),loadAdminStats()]);
+  }catch(e){console.error("Delete all delivered orders:",e);toast("Could not delete delivered orders: "+e.message,true);}
+}
+
 async function loadAdminOrders(status,options={}){
   
   adminOrderFilter=status;
@@ -3795,6 +4397,12 @@ async function loadAdminOrders(status,options={}){
   
 
   
+    const deliveredToolbar=status==="delivered"?`
+      <div class="archive-toolbar delivered-orders-toolbar" style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:12px;padding:10px 12px;border:1px solid var(--border);border-radius:12px;background:var(--card);">
+        <label style="display:flex;align-items:center;gap:8px;font-size:12px;font-weight:700;cursor:pointer"><input type="checkbox" id="selectAllDeliveredOrders" onchange="toggleAllDeliveredOrders(this.checked)"> Select all</label>
+        <div style="display:flex;gap:7px;flex-wrap:wrap"><button class="btn danger small" id="deleteSelectedDeliveredBtn" onclick="deleteSelectedDeliveredOrders()" disabled>Delete selected</button><button class="btn danger small" onclick="deleteAllDeliveredOrders()">Delete all</button></div>
+      </div>`:"";
+  
     const nextHtml=data.map(o=>{
   
       const unread=unreadMap[o.id]||0;
@@ -3861,6 +4469,11 @@ async function loadAdminOrders(status,options={}){
   
             ${mapBtn}
   
+            ${status==="delivered" ? `
+              <label style="display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:700;margin-right:auto;cursor:pointer"><input type="checkbox" class="delivered-order-check" value="${esc(o.id)}" onchange="updateDeliveredSelectionState()"> Select</label>
+              <button class="btn danger small" onclick="deleteDeliveredOrder('${esc(o.id)}')">Delete</button>
+            ` : ""}
+  
             ${status==="pending" ? `
   
               <button class="btn blue small" onclick="deliverOrder('${o.id}')">
@@ -3881,11 +4494,13 @@ async function loadAdminOrders(status,options={}){
   
 
   
-    if(list.dataset.renderKey===nextHtml)return;
+    const renderedHtml=deliveredToolbar+nextHtml;
+    if(list.dataset.renderKey===renderedHtml)return;
   
-    list.innerHTML=nextHtml;
+    list.innerHTML=renderedHtml;
   
-    list.dataset.renderKey=nextHtml;
+    list.dataset.renderKey=renderedHtml;
+    if(status==="delivered")updateDeliveredSelectionState();
   
   }catch(e){
   
@@ -4428,7 +5043,9 @@ function resetAdminProductForm(){
   $("adminProductDescription").value="";
   
   $("adminProductPrice").value="";
+  
   $("adminProductThc").value="";
+  
   $("adminProductEffects").value="";
   
   $("adminProductImage").value="";
@@ -4639,7 +5256,7 @@ async function loadAdminProducts(){
   
   const {data,error}=await sb.from("products")
   
-    .select("id,name,description,price_tzs,image_url,active,thc_percent,effects,created_at")
+    .select("id,name,description,price_tzs,image_url,active,created_at,thc_percent,effects")
   
     .order("created_at",{ascending:false});
   
@@ -4696,8 +5313,10 @@ async function loadAdminProducts(){
           <div class="muted" style="font-size:11px;margin-top:3px">${esc(p.description||"")}</div>
   
           <div class="green" style="margin-top:5px">${money(p.price_tzs)}</div>
-          ${Number.isFinite(Number(p.thc_percent)) ? `<div class="muted" style="font-size:10px;margin-top:4px">THC ${Number(p.thc_percent)}%</div>` : ""}
-          ${p.effects ? `<div class="muted" style="font-size:10px;margin-top:3px">${esc(p.effects)}</div>` : ""}
+  
+          ${Number.isFinite(Number(p.thc_percent)) ? `<div class="admin-potency">THC ${Number(p.thc_percent)%1===0?Number(p.thc_percent).toFixed(0):Number(p.thc_percent).toFixed(1)}%</div>` : ""}
+  
+          ${String(p.effects||"").trim() ? `<div class="admin-effects">${String(p.effects).split(",").map(x=>x.trim()).filter(Boolean).slice(0,8).map(x=>`<span class="admin-effect-tag">${esc(x)}</span>`).join("")}</div>` : ""}
   
           <div class="muted" style="font-size:10px;margin-top:3px">${p.active ? "Active" : "Inactive"}</div>
   
@@ -4752,7 +5371,9 @@ async function editAdminProduct(productId){
   $("adminProductDescription").value=data.description||"";
   
   $("adminProductPrice").value=data.price_tzs||"";
+  
   $("adminProductThc").value=data.thc_percent ?? "";
+  
   $("adminProductEffects").value=data.effects||"";
   
   $("adminProductImage").value="";
@@ -4854,9 +5475,7 @@ $("saveAdminProductBtn").onclick=async()=>{
   const description=$("adminProductDescription").value.trim()||null;
   
   const price=Number($("adminProductPrice").value);
-  const thcRaw=$("adminProductThc").value.trim();
-  const thc=thcRaw==="" ? null : Number(thcRaw);
-  const effects=$("adminProductEffects").value.trim()||null;
+  
   const imageFile=$("adminProductImage").files?.[0]||null;
   
 
@@ -4870,10 +5489,6 @@ $("saveAdminProductBtn").onclick=async()=>{
   if(!Number.isInteger(price) || price<=0)
   
     return toast("Enter a valid whole TSH price.",true);
-
-  if(thc!==null && (!Number.isFinite(thc) || thc<0 || thc>100))
-  
-    return toast("THC must be between 0 and 100%.",true);
   
 
   
@@ -4917,9 +5532,7 @@ $("saveAdminProductBtn").onclick=async()=>{
   
           description,
   
-          price_tzs:price,
-          thc_percent:thc,
-          effects
+          price_tzs:price
   
         })
   
@@ -4940,8 +5553,6 @@ $("saveAdminProductBtn").onclick=async()=>{
           description,
   
           price_tzs:price,
-          thc_percent:thc,
-          effects,
   
           active:true
   
@@ -6623,6 +7234,74 @@ async function handleSessionRevoked(message){
   
 
   
+function archivedSessionChecks(){
+  return [...document.querySelectorAll(".archived-session-check")];
+}
+
+function updateArchivedSelectionState(){
+  const checks=archivedSessionChecks();
+  const selected=checks.filter(c=>c.checked);
+  const btn=$("deleteSelectedArchivedBtn");
+  if(btn){
+    btn.disabled=selected.length===0;
+    btn.textContent=selected.length ? `Delete selected (${selected.length})` : "Delete selected";
+  }
+  const all=$("selectAllArchivedSessions");
+  if(all){
+    all.checked=checks.length>0 && selected.length===checks.length;
+    all.indeterminate=selected.length>0 && selected.length<checks.length;
+  }
+}
+
+function toggleAllArchivedSessions(checked){
+  archivedSessionChecks().forEach(c=>c.checked=!!checked);
+  updateArchivedSelectionState();
+}
+
+async function deleteArchivedSession(sessionId){
+  if(!sessionId || !sb || !currentProfile?.is_admin) return;
+  if(!confirm("Delete this archived session permanently? This action cannot be undone.")) return;
+  try{
+    const {error}=await sb.from("user_sessions").delete().eq("id",sessionId).eq("is_active",false);
+    if(error) throw error;
+    toast("Archived session deleted.");
+    await loadAdminSessions();
+  }catch(e){
+    console.error("Delete archived session:",e);
+    toast("Could not delete session: "+e.message,true);
+  }
+}
+
+async function deleteSelectedArchivedSessions(){
+  if(!sb || !currentProfile?.is_admin) return;
+  const ids=archivedSessionChecks().filter(c=>c.checked).map(c=>c.value).filter(Boolean);
+  if(!ids.length) return;
+  if(!confirm(`Delete ${ids.length} archived session${ids.length===1?"":"s"} permanently? This action cannot be undone.`)) return;
+  try{
+    const {error}=await sb.from("user_sessions").delete().in("id",ids).eq("is_active",false);
+    if(error) throw error;
+    toast(`${ids.length} archived session${ids.length===1?"":"s"} deleted.`);
+    await loadAdminSessions();
+  }catch(e){
+    console.error("Delete selected archived sessions:",e);
+    toast("Could not delete selected sessions: "+e.message,true);
+  }
+}
+
+async function deleteAllArchivedSessions(){
+  if(!sb || !currentProfile?.is_admin) return;
+  if(!confirm("Delete ALL archived sessions permanently? This action cannot be undone.")) return;
+  try{
+    const {error}=await sb.from("user_sessions").delete().eq("is_active",false);
+    if(error) throw error;
+    toast("All archived sessions deleted.");
+    await loadAdminSessions();
+  }catch(e){
+    console.error("Delete all archived sessions:",e);
+    toast("Could not delete archived sessions: "+e.message,true);
+  }
+}
+
 async function loadAdminSessions(){
   
   const list=$("adminSessionsList");
@@ -6751,8 +7430,19 @@ async function loadAdminSessions(){
   
 
   
-    list.innerHTML=`
-  
+    const archiveToolbar = adminSessionView==="active" ? "" : `
+      <div class="archive-toolbar" style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:12px;padding:10px 12px;border:1px solid var(--border);border-radius:12px;background:var(--card);">
+        <label style="display:flex;align-items:center;gap:8px;font-size:12px;font-weight:700;cursor:pointer">
+          <input type="checkbox" id="selectAllArchivedSessions" onchange="toggleAllArchivedSessions(this.checked)">
+          Select all
+        </label>
+        <div style="display:flex;gap:7px;flex-wrap:wrap">
+          <button class="btn danger small" id="deleteSelectedArchivedBtn" onclick="deleteSelectedArchivedSessions()" disabled>Delete selected</button>
+          <button class="btn danger small" onclick="deleteAllArchivedSessions()">Delete all</button>
+        </div>
+      </div>`;
+
+    list.innerHTML=archiveToolbar+`
       <div class="session-grid">
   
         ${filtered.map(x=>{
@@ -6771,6 +7461,14 @@ async function loadAdminSessions(){
   
 
   
+              ${adminSessionView==="active" ? "" : `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:9px">
+                <label style="display:flex;align-items:center;gap:7px;font-size:11px;font-weight:700;cursor:pointer">
+                  <input type="checkbox" class="archived-session-check" value="${esc(x.id)}" onchange="updateArchivedSelectionState()">
+                  Select
+                </label>
+                <button class="btn danger small" onclick="deleteArchivedSession('${esc(x.id)}')" aria-label="Delete archived session">Delete</button>
+              </div>`}
+
               <div style="display:flex;justify-content:space-between;gap:8px">
   
 
@@ -7439,4 +8137,239 @@ document.addEventListener("keydown",e=>{
   
 */
   
-</script></body></html>   
+</script><script>
+/* ---------- Account password change ---------- */
+(function(){
+  const modal=()=>$("changePasswordModal");
+  const resetFields=()=>{
+    ["currentPasswordSettings","newPasswordSettings","confirmPasswordSettings"].forEach(id=>{const el=$(id);if(el)el.value="";});
+    updateRules("");
+    const m=$("passwordMatchSettings");if(m){m.textContent="";m.className="password-match";}
+  };
+  function updateRules(pass){
+    const checks={
+      length:pass.length>=8,
+      upper:/[A-Z]/.test(pass),
+      lower:/[a-z]/.test(pass),
+      number:/[0-9]/.test(pass),
+      symbol:/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(pass)
+    };
+    Object.entries(checks).forEach(([key,ok])=>document.querySelector(`[data-password-rule="${key}"]`)?.classList.toggle("ok",ok));
+    return Object.values(checks).every(Boolean);
+  }
+  function updateMatch(){
+    const a=$("newPasswordSettings")?.value||"",b=$("confirmPasswordSettings")?.value||"";
+    const el=$("passwordMatchSettings");if(!el)return;
+    if(!b){el.textContent="";el.className="password-match";return;}
+    const ok=a===b;el.textContent=ok?"Passwords match.":"Passwords do not match.";el.className="password-match "+(ok?"ok":"bad");
+  }
+  function lockPage(){document.body.classList.add("modal-scroll-lock");}
+  function unlockPage(){if($("changePasswordModal")?.classList.contains("hidden") && $("settingsModal")?.classList.contains("hidden"))document.body.classList.remove("modal-scroll-lock");}
+  function open(){
+    if(!currentUser?.email)return toast("Your account session is not ready. Please sign in again.",true);
+    window.closeKhaluSettings?.();
+    resetFields();
+    modal()?.classList.remove("hidden");
+    lockPage();
+    setTimeout(()=>$("currentPasswordSettings")?.focus({preventScroll:true}),80);
+  }
+  function close(){modal()?.classList.add("hidden");resetFields();unlockPage();}
+  async function submit(){
+    const oldPass=$("currentPasswordSettings")?.value||"",newPass=$("newPasswordSettings")?.value||"",confirmPass=$("confirmPasswordSettings")?.value||"";
+    if(!oldPass)return toast("Enter your current password.",true);
+    if(!updateRules(newPass))return toast("New password does not meet all requirements.",true);
+    if(newPass!==confirmPass)return toast("New passwords do not match.",true);
+    if(newPass===oldPass)return toast("New password must be different from your current password.",true);
+    if(!sb||!currentUser?.email)return toast("Authentication is not ready. Please sign in again.",true);
+    const btn=$("changePasswordSubmit");btn.disabled=true;btn.textContent="Verifying...";
+    try{
+      const {data,error}=await sb.auth.signInWithPassword({email:currentUser.email,password:oldPass});
+      if(error)throw new Error("Current password is incorrect.");
+      if(!data?.user)throw new Error("Could not verify your account.");
+      btn.textContent="Updating...";
+      const {error:updateError}=await sb.auth.updateUser({password:newPass});
+      if(updateError)throw updateError;
+      close();
+      toast("Password updated successfully.");
+    }catch(e){console.error("Change password:",e);toast(e.message||"Could not update password.",true);}
+    finally{btn.disabled=false;btn.textContent="Update password";}
+  }
+  document.addEventListener("DOMContentLoaded",()=>{
+    $("openChangePasswordBtn")?.addEventListener("click",open);
+    $("closeChangePassword")?.addEventListener("click",close);
+    $("cancelChangePassword")?.addEventListener("click",close);
+    $("changePasswordModal")?.addEventListener("click",e=>{if(e.target.id==="changePasswordModal")close();});
+    $("newPasswordSettings")?.addEventListener("input",e=>{updateRules(e.target.value);updateMatch();});
+    $("confirmPasswordSettings")?.addEventListener("input",updateMatch);
+    $("changePasswordSubmit")?.addEventListener("click",submit);
+    document.querySelectorAll("[data-password-target]").forEach(btn=>btn.addEventListener("click",()=>{
+      const input=$(btn.dataset.passwordTarget);if(!input)return;
+      input.type=input.type==="password"?"text":"password";
+      btn.setAttribute("aria-label",input.type==="password"?"Show password":"Hide password");
+      btn.innerHTML=input.type==="password"?'<svg viewBox="0 0 24 24"><path d="M2.5 12s3.2-6 9.5-6 9.5 6 9.5 6-3.2 6-9.5 6-9.5-6-9.5-6Z"/><circle cx="12" cy="12" r="2.5"/></svg>':'<svg viewBox="0 0 24 24"><path d="m3 3 18 18"/><path d="M10.6 5.2A10.6 10.6 0 0 1 12 5c6.3 0 9.5 7 9.5 7a15.6 15.6 0 0 1-3.1 4.1M6.2 6.2C3.8 8.1 2.5 12 2.5 12s3.2 6 9.5 6c1.4 0 2.6-.3 3.7-.8"/></svg>';
+    }));
+  });
+})();
+
+/* ---------- KhaluCulator Settings ---------- */
+(function(){
+const THEME_KEY="khaluculator_theme",CURRENCY_KEY="khaluculator_currency",DECIMALS_KEY="khaluculator_decimals",NOTIFY_KEY="khaluculator_notifications",VIEW_KEY="khaluculator_product_view",USD_RATE_KEY="khaluculator_usd_tzs_rate";
+const validThemes=["dark","light","system"],validCurrencies=["TSH","TZS","USD"],validViews=["grid","list","compact"];
+const getTheme=()=>validThemes.includes(localStorage.getItem(THEME_KEY))?localStorage.getItem(THEME_KEY):"system";
+const getCurrency=()=>validCurrencies.includes(localStorage.getItem(CURRENCY_KEY))?localStorage.getItem(CURRENCY_KEY):"TSH";
+const getDecimals=()=>["auto","0","2","4"].includes(localStorage.getItem(DECIMALS_KEY))?localStorage.getItem(DECIMALS_KEY):"auto";
+const getNotifications=()=>localStorage.getItem(NOTIFY_KEY)!=="0";
+const getView=()=>validViews.includes(localStorage.getItem(VIEW_KEY))?localStorage.getItem(VIEW_KEY):"grid";
+const getUsdTzsRate=()=>Number(localStorage.getItem(USD_RATE_KEY))||0;
+function applyTheme(theme){const light=theme==="light"||(theme==="system"&&window.matchMedia?.("(prefers-color-scheme: light)").matches);document.body.classList.toggle("light-theme",!!light);document.documentElement.dataset.theme=theme;document.querySelectorAll("[data-theme-choice]").forEach(b=>b.classList.toggle("active",b.dataset.themeChoice===theme));}
+function setTheme(theme){if(validThemes.includes(theme)){localStorage.setItem(THEME_KEY,theme);applyTheme(theme);}}
+async function refreshUsdRate(){try{const r=await fetch("https://open.er-api.com/v6/latest/USD",{cache:"no-store"});const j=await r.json();const rate=Number(j?.rates?.TZS);if(rate>0&&Number.isFinite(rate)){localStorage.setItem(USD_RATE_KEY,String(rate));window.dispatchEvent(new CustomEvent("khalu:currency-rate-updated"));}}catch(e){console.warn("USD rate unavailable",e)}}
+async function refreshVisibleCurrency(){try{if(typeof window.loadProducts==="function")await window.loadProducts(true);if(typeof window.loadMyOrders==="function")await window.loadMyOrders();if(typeof window.loadMyTransactions==="function")await window.loadMyTransactions();if(typeof window.loadWallet==="function")await window.loadWallet();if(typeof currentProfile!=="undefined"&&currentProfile?.is_admin){if(typeof window.loadAdminStats==="function")await window.loadAdminStats();if(typeof window.loadAdminOrders==="function")await window.loadAdminOrders((typeof adminOrderFilter!=="undefined"?adminOrderFilter:"pending"),{silent:true});if(typeof window.loadAdminTransactions==="function")await window.loadAdminTransactions();if(typeof window.loadAdminProducts==="function")await window.loadAdminProducts();}}catch(e){console.warn("Settings refresh failed",e)}document.querySelectorAll(".currency-tag").forEach(el=>el.textContent=getCurrency());const label=document.getElementById("priceCurrencyLabel");if(label)label.textContent=`All prices in ${getCurrency()}`;}
+function syncSettingsUI(){const c=$("settingsCurrency");if(c)c.value=getCurrency();const d=$("settingsDecimals");if(d)d.value=getDecimals();const n=$("settingsNotifications");if(n){const on=getNotifications();n.setAttribute("aria-pressed",String(on));n.title=on?"Notifications enabled":"Notifications disabled"}const v=$("settingsProductView");if(v)v.value=getView();}
+window.KHALU_SETTINGS={getCurrency,getDecimals,getUsdTzsRate,refreshVisibleCurrency};window.setKhaluTheme=setTheme;window.openKhaluSettings=()=>{const m=$("settingsModal");if(!m)return;m.classList.remove("hidden");document.body.classList.add("modal-scroll-lock");applyTheme(getTheme());syncSettingsUI();};window.closeKhaluSettings=()=>{const m=$("settingsModal");if(m)m.classList.add("hidden");if($("changePasswordModal")?.classList.contains("hidden"))document.body.classList.remove("modal-scroll-lock");};applyTheme(getTheme());
+const media=window.matchMedia?.("(prefers-color-scheme: light)");if(media){const f=()=>{if(getTheme()==="system")applyTheme("system")};media.addEventListener?.("change",f);media.addListener?.(f);}
+window.addEventListener("khalu:currency-rate-updated",refreshVisibleCurrency);window.addEventListener("storage",e=>{if([THEME_KEY,CURRENCY_KEY,DECIMALS_KEY,NOTIFY_KEY,VIEW_KEY].includes(e.key)){applyTheme(getTheme());if(e.key===VIEW_KEY&&typeof window.setProductView==="function")window.setProductView(getView());syncSettingsUI();if(e.key===CURRENCY_KEY||e.key===DECIMALS_KEY)refreshVisibleCurrency();}});
+document.addEventListener("DOMContentLoaded",()=>{
+$("settingsBtn")?.addEventListener("click",window.openKhaluSettings);$("closeSettings")?.addEventListener("click",window.closeKhaluSettings);document.querySelectorAll("[data-theme-choice]").forEach(b=>b.addEventListener("click",()=>setTheme(b.dataset.themeChoice)));
+$("settingsCurrency")?.addEventListener("change",async e=>{const v=validCurrencies.includes(e.target.value)?e.target.value:"TSH";localStorage.setItem(CURRENCY_KEY,v);if(v==="USD"&&!getUsdTzsRate())await refreshUsdRate();await refreshVisibleCurrency();});
+$("settingsDecimals")?.addEventListener("change",e=>{const v=["auto","0","2","4"].includes(e.target.value)?e.target.value:"auto";localStorage.setItem(DECIMALS_KEY,v);const d=$("calcDisplay");if(d&&/^-?\d+(\.\d+)?$/.test(d.textContent.trim()))d.textContent=formatCalcNumber(Number(d.textContent));refreshVisibleCurrency();});
+$("settingsNotifications")?.addEventListener("click",e=>{const on=e.currentTarget.getAttribute("aria-pressed")!=="true";localStorage.setItem(NOTIFY_KEY,on?"1":"0");e.currentTarget.setAttribute("aria-pressed",String(on));e.currentTarget.title=on?"Notifications enabled":"Notifications disabled";});
+$("settingsProductView")?.addEventListener("change",e=>{if(validViews.includes(e.target.value)&&typeof window.setProductView==="function")window.setProductView(e.target.value);});
+$("resetSettingsBtn")?.addEventListener("click",async()=>{localStorage.removeItem(THEME_KEY);localStorage.removeItem(CURRENCY_KEY);localStorage.removeItem(DECIMALS_KEY);localStorage.removeItem(NOTIFY_KEY);localStorage.removeItem(VIEW_KEY);applyTheme("system");if(typeof window.setProductView==="function")window.setProductView("grid");syncSettingsUI();await refreshVisibleCurrency();});
+$("settingsModal")?.addEventListener("click",e=>{if(e.target.id==="settingsModal")window.closeKhaluSettings();});
+document.addEventListener("keydown",e=>{if(e.key==="Escape"){if(!$('changePasswordModal')?.classList.contains("hidden")){document.querySelector("#cancelChangePassword")?.click();}else if(!$('settingsModal')?.classList.contains("hidden")){window.closeKhaluSettings();}}});syncSettingsUI();if(getCurrency()==="USD")refreshUsdRate();});
+})();
+</script></body></html>
+<style id="light-product-potency-effects-final">
+body.light-theme #productsList.product-view-list .product .product-potency{border-top:0;padding-top:2px;margin-top:1px}
+body.light-theme #productsList.product-view-list .effect-tag{background:#e8f4ea;border-color:#b9d6be;color:#176b2c}
+body.light-theme #productsList.product-view-list .product-effects-label{color:#176b2c}
+body.light-theme #productsList.product-view-compact .effect-tag{background:#e8f4ea;border-color:#b9d6be;color:#176b2c}
+body:not(.light-theme) .product-potency{border-top:0;padding-top:4px;margin-top:5px}
+</style>
+<style id="settings-action-polish-final">
+/* ---------- Settings action rows: clean native list treatment ---------- */
+.settings-action-row{
+  min-height:52px;
+  margin-top:4px;
+  padding:10px 2px;
+  border:0;
+  border-bottom:1px solid #1c2d1f;
+  border-radius:0;
+  background:transparent;
+  box-shadow:none;
+  transition:background .15s ease,padding .15s ease;
+}
+.settings-action-row:hover{
+  border-color:#1c2d1f;
+  background:rgba(76,175,80,.05);
+  padding-left:7px;
+  padding-right:7px;
+}
+.settings-action-row:active{background:rgba(76,175,80,.09)}
+.settings-action-icon{
+  width:30px;height:30px;flex:0 0 30px;
+  border:1px solid #29482c;border-radius:8px;
+  background:#111912;
+}
+.settings-action-row strong{font-size:12px}
+.settings-action-row small{font-size:10px;line-height:1.35}
+.settings-chevron{font-size:19px;font-weight:500}
+.settings-logout-row{cursor:default}
+.settings-logout-row:hover{padding-left:2px;padding-right:2px;background:rgba(220,70,70,.04)}
+.settings-inline-logout{
+  margin-left:auto;
+  min-width:64px;
+  height:32px;
+  padding:0 10px;
+  border:1px solid #6d3030;
+  border-radius:8px;
+  background:transparent;
+  color:#e47b7b;
+  font-size:10px;
+  font-weight:800;
+}
+.settings-inline-logout:hover{background:rgba(220,70,70,.08);border-color:#a34a4a}
+
+/* Reset action: deliberate, compact danger-zone control */
+.settings-reset{
+  display:flex!important;
+  align-items:center;
+  justify-content:center;
+  gap:7px;
+  width:auto!important;
+  min-width:150px;
+  height:42px;
+  margin:20px auto 4px!important;
+  padding:0 16px!important;
+  border:1px solid #6d3030!important;
+  border-radius:9px!important;
+  background:transparent!important;
+  color:#e47b7b!important;
+  font-size:11px!important;
+  font-weight:800!important;
+  box-shadow:none!important;
+}
+.settings-reset:hover{background:rgba(220,70,70,.07)!important;border-color:#a34a4a!important}
+.settings-reset:active{transform:translateY(1px)}
+
+body.light-theme .settings-action-row{border-bottom-color:#dce6de;background:transparent}
+body.light-theme .settings-action-row:hover{border-bottom-color:#dce6de;background:#f5faf6}
+body.light-theme .settings-action-icon{border-color:#cfe0d2;background:#f5f8f5;color:#176b2c}
+body.light-theme .settings-inline-logout{border-color:#e1b7b7;color:#b23b3b;background:#fff}
+body.light-theme .settings-inline-logout:hover{background:#fff5f5;border-color:#c97a7a}
+body.light-theme .settings-reset{border-color:#e1b7b7!important;color:#b23b3b!important;background:#fff!important}
+body.light-theme .settings-reset:hover{background:#fff5f5!important;border-color:#c97a7a!important}
+
+@media(max-width:520px){
+  .settings-action-row{min-height:50px;padding:9px 0}
+  .settings-action-row:hover{padding-left:5px;padding-right:5px}
+  .settings-reset{width:100%!important;min-width:0;margin-top:18px!important}
+}
+
+/* ---------- Settings separator reduction polish ---------- */
+#settingsModal .settings-section{
+  border-top:0!important;
+  padding-top:8px!important;
+  margin-top:12px!important;
+}
+#settingsModal .settings-section-title{
+  margin-bottom:7px!important;
+}
+#settingsModal .settings-row{
+  border:0!important;
+  box-shadow:none!important;
+  background:#101711;
+}
+#settingsModal .settings-action-row{
+  border-top:0!important;
+  border-bottom:0!important;
+  box-shadow:none!important;
+}
+#settingsModal .settings-action-row + .settings-action-row{
+  border-top:0!important;
+}
+body.light-theme #settingsModal .settings-row{
+  background:#f7faf7;
+  border:0!important;
+}
+body.light-theme #settingsModal .settings-action-row{
+  border-top:0!important;
+  border-bottom:0!important;
+}
+#settingsModal .settings-section + .settings-section{
+  margin-top:14px!important;
+}
+#settingsModal .settings-reset{
+  border-width:1px!important;
+}
+@media(max-width:520px){
+  #settingsModal .settings-section{
+    margin-top:10px!important;
+    padding-top:6px!important;
+  }
+  #settingsModal .settings-section + .settings-section{
+    margin-top:11px!important;
+  }
+}
+</style>
