@@ -1138,7 +1138,141 @@ body.light-theme #welcomeSequence .welcome-status{color:#7a887e}
 body.light-theme #welcomeSequence .final-sub{color:#66736a}
 body.light-theme #welcomeSequence .enter-cue{color:#176b2c}
 
-</style></head><body><section id="unlock">  <div class="card"><div class="center">
+</style>
+<style id="light-product-potency-effects-final">
+body.light-theme #productsList.product-view-list .product .product-potency{border-top:0;padding-top:2px;margin-top:1px}
+body.light-theme #productsList.product-view-list .effect-tag{background:#e8f4ea;border-color:#b9d6be;color:#176b2c}
+body.light-theme #productsList.product-view-list .product-effects-label{color:#176b2c}
+body.light-theme #productsList.product-view-compact .effect-tag{background:#e8f4ea;border-color:#b9d6be;color:#176b2c}
+body:not(.light-theme) .product-potency{border-top:0;padding-top:4px;margin-top:5px}
+</style>
+<style id="settings-action-polish-final">
+/* ---------- Settings action rows: clean native list treatment ---------- */
+.settings-action-row{
+  min-height:52px;
+  margin-top:4px;
+  padding:10px 2px;
+  border:0;
+  border-bottom:1px solid #1c2d1f;
+  border-radius:0;
+  background:transparent;
+  box-shadow:none;
+  transition:background .15s ease,padding .15s ease;
+}
+.settings-action-row:hover{
+  border-color:#1c2d1f;
+  background:rgba(76,175,80,.05);
+  padding-left:7px;
+  padding-right:7px;
+}
+.settings-action-row:active{background:rgba(76,175,80,.09)}
+.settings-action-icon{
+  width:30px;height:30px;flex:0 0 30px;
+  border:1px solid #29482c;border-radius:8px;
+  background:#111912;
+}
+.settings-action-row strong{font-size:12px}
+.settings-action-row small{font-size:10px;line-height:1.35}
+.settings-chevron{font-size:19px;font-weight:500}
+.settings-logout-row{cursor:default}
+.settings-logout-row:hover{padding-left:2px;padding-right:2px;background:rgba(220,70,70,.04)}
+.settings-inline-logout{
+  margin-left:auto;
+  min-width:64px;
+  height:32px;
+  padding:0 10px;
+  border:1px solid #6d3030;
+  border-radius:8px;
+  background:transparent;
+  color:#e47b7b;
+  font-size:10px;
+  font-weight:800;
+}
+.settings-inline-logout:hover{background:rgba(220,70,70,.08);border-color:#a34a4a}
+
+/* Reset action: deliberate, compact danger-zone control */
+.settings-reset{
+  display:flex!important;
+  align-items:center;
+  justify-content:center;
+  gap:7px;
+  width:auto!important;
+  min-width:150px;
+  height:42px;
+  margin:20px auto 4px!important;
+  padding:0 16px!important;
+  border:1px solid #6d3030!important;
+  border-radius:9px!important;
+  background:transparent!important;
+  color:#e47b7b!important;
+  font-size:11px!important;
+  font-weight:800!important;
+  box-shadow:none!important;
+}
+.settings-reset:hover{background:rgba(220,70,70,.07)!important;border-color:#a34a4a!important}
+.settings-reset:active{transform:translateY(1px)}
+
+body.light-theme .settings-action-row{border-bottom-color:#dce6de;background:transparent}
+body.light-theme .settings-action-row:hover{border-bottom-color:#dce6de;background:#f5faf6}
+body.light-theme .settings-action-icon{border-color:#cfe0d2;background:#f5f8f5;color:#176b2c}
+body.light-theme .settings-inline-logout{border-color:#e1b7b7;color:#b23b3b;background:#fff}
+body.light-theme .settings-inline-logout:hover{background:#fff5f5;border-color:#c97a7a}
+body.light-theme .settings-reset{border-color:#e1b7b7!important;color:#b23b3b!important;background:#fff!important}
+body.light-theme .settings-reset:hover{background:#fff5f5!important;border-color:#c97a7a!important}
+
+@media(max-width:520px){
+  .settings-action-row{min-height:50px;padding:9px 0}
+  .settings-action-row:hover{padding-left:5px;padding-right:5px}
+  .settings-reset{width:100%!important;min-width:0;margin-top:18px!important}
+}
+
+/* ---------- Settings separator reduction polish ---------- */
+#settingsModal .settings-section{
+  border-top:0!important;
+  padding-top:8px!important;
+  margin-top:12px!important;
+}
+#settingsModal .settings-section-title{
+  margin-bottom:7px!important;
+}
+#settingsModal .settings-row{
+  border:0!important;
+  box-shadow:none!important;
+  background:#101711;
+}
+#settingsModal .settings-action-row{
+  border-top:0!important;
+  border-bottom:0!important;
+  box-shadow:none!important;
+}
+#settingsModal .settings-action-row + .settings-action-row{
+  border-top:0!important;
+}
+body.light-theme #settingsModal .settings-row{
+  background:#f7faf7;
+  border:0!important;
+}
+body.light-theme #settingsModal .settings-action-row{
+  border-top:0!important;
+  border-bottom:0!important;
+}
+#settingsModal .settings-section + .settings-section{
+  margin-top:14px!important;
+}
+#settingsModal .settings-reset{
+  border-width:1px!important;
+}
+@media(max-width:520px){
+  #settingsModal .settings-section{
+    margin-top:10px!important;
+    padding-top:6px!important;
+  }
+  #settingsModal .settings-section + .settings-section{
+    margin-top:11px!important;
+  }
+}
+</style>
+</head><body><section id="unlock">  <div class="card"><div class="center">
 
   <h2 class="green">🌿 Calculator</h2>
 
@@ -8396,7 +8530,8 @@ document.addEventListener("keydown",e=>{
     }));
   });
 })();
-
+</script>
+<script>
 /* ---------- KhaluCulator Settings ---------- */
 (function(){
 const THEME_KEY="khaluculator_theme",CURRENCY_KEY="khaluculator_currency",DECIMALS_KEY="khaluculator_decimals",NOTIFY_KEY="khaluculator_notifications",VIEW_KEY="khaluculator_product_view",USD_RATE_KEY="khaluculator_usd_tzs_rate";
@@ -8425,142 +8560,33 @@ $("resetSettingsBtn")?.addEventListener("click",async()=>{localStorage.removeIte
 $("settingsModal")?.addEventListener("click",e=>{if(e.target.id==="settingsModal")window.closeKhaluSettings();});
 document.addEventListener("keydown",e=>{if(e.key==="Escape"){if(!$('changePasswordModal')?.classList.contains("hidden")){document.querySelector("#cancelChangePassword")?.click();}else if(!$('settingsModal')?.classList.contains("hidden")){window.closeKhaluSettings();}}});syncSettingsUI();if(getCurrency()==="USD")refreshUsdRate();});
 })();
-
+</script>
+<script>
+/* ---------- Settings click safety bridge ---------- */
+(function(){
+  function openSettings(){
+    if(typeof window.openKhaluSettings === "function") window.openKhaluSettings();
+  }
+  function closeSettings(){
+    if(typeof window.closeKhaluSettings === "function") window.closeKhaluSettings();
+  }
+  document.addEventListener("click",function(e){
+    const open=e.target?.closest?.("#settingsBtn");
+    if(open){e.preventDefault();e.stopPropagation();openSettings();return;}
+    const close=e.target?.closest?.("#closeSettings");
+    if(close){e.preventDefault();e.stopPropagation();closeSettings();}
+  },true);
+})();
+</script>
 <script>
 /* ---------- Native Android push bridge ---------- */
 window.__khaluDeactivatePushToken = window.__khaluDeactivatePushToken || (async()=>{});
 </script>
+<style id="settings-interaction-safety">
+#userHeader{position:relative;z-index:50}
+#userHeader .settings-icon-btn{position:relative;z-index:60;pointer-events:auto!important;touch-action:manipulation}
+#settingsModal{pointer-events:auto!important}
+#settingsModal .settings-modal,#settingsModal .settings-modal *{pointer-events:auto}
+#settingsModal .settings-close{position:relative;z-index:20;cursor:pointer}
+</style>
 </body></html>
-<style id="light-product-potency-effects-final">
-body.light-theme #productsList.product-view-list .product .product-potency{border-top:0;padding-top:2px;margin-top:1px}
-body.light-theme #productsList.product-view-list .effect-tag{background:#e8f4ea;border-color:#b9d6be;color:#176b2c}
-body.light-theme #productsList.product-view-list .product-effects-label{color:#176b2c}
-body.light-theme #productsList.product-view-compact .effect-tag{background:#e8f4ea;border-color:#b9d6be;color:#176b2c}
-body:not(.light-theme) .product-potency{border-top:0;padding-top:4px;margin-top:5px}
-</style>
-<style id="settings-action-polish-final">
-/* ---------- Settings action rows: clean native list treatment ---------- */
-.settings-action-row{
-  min-height:52px;
-  margin-top:4px;
-  padding:10px 2px;
-  border:0;
-  border-bottom:1px solid #1c2d1f;
-  border-radius:0;
-  background:transparent;
-  box-shadow:none;
-  transition:background .15s ease,padding .15s ease;
-}
-.settings-action-row:hover{
-  border-color:#1c2d1f;
-  background:rgba(76,175,80,.05);
-  padding-left:7px;
-  padding-right:7px;
-}
-.settings-action-row:active{background:rgba(76,175,80,.09)}
-.settings-action-icon{
-  width:30px;height:30px;flex:0 0 30px;
-  border:1px solid #29482c;border-radius:8px;
-  background:#111912;
-}
-.settings-action-row strong{font-size:12px}
-.settings-action-row small{font-size:10px;line-height:1.35}
-.settings-chevron{font-size:19px;font-weight:500}
-.settings-logout-row{cursor:default}
-.settings-logout-row:hover{padding-left:2px;padding-right:2px;background:rgba(220,70,70,.04)}
-.settings-inline-logout{
-  margin-left:auto;
-  min-width:64px;
-  height:32px;
-  padding:0 10px;
-  border:1px solid #6d3030;
-  border-radius:8px;
-  background:transparent;
-  color:#e47b7b;
-  font-size:10px;
-  font-weight:800;
-}
-.settings-inline-logout:hover{background:rgba(220,70,70,.08);border-color:#a34a4a}
-
-/* Reset action: deliberate, compact danger-zone control */
-.settings-reset{
-  display:flex!important;
-  align-items:center;
-  justify-content:center;
-  gap:7px;
-  width:auto!important;
-  min-width:150px;
-  height:42px;
-  margin:20px auto 4px!important;
-  padding:0 16px!important;
-  border:1px solid #6d3030!important;
-  border-radius:9px!important;
-  background:transparent!important;
-  color:#e47b7b!important;
-  font-size:11px!important;
-  font-weight:800!important;
-  box-shadow:none!important;
-}
-.settings-reset:hover{background:rgba(220,70,70,.07)!important;border-color:#a34a4a!important}
-.settings-reset:active{transform:translateY(1px)}
-
-body.light-theme .settings-action-row{border-bottom-color:#dce6de;background:transparent}
-body.light-theme .settings-action-row:hover{border-bottom-color:#dce6de;background:#f5faf6}
-body.light-theme .settings-action-icon{border-color:#cfe0d2;background:#f5f8f5;color:#176b2c}
-body.light-theme .settings-inline-logout{border-color:#e1b7b7;color:#b23b3b;background:#fff}
-body.light-theme .settings-inline-logout:hover{background:#fff5f5;border-color:#c97a7a}
-body.light-theme .settings-reset{border-color:#e1b7b7!important;color:#b23b3b!important;background:#fff!important}
-body.light-theme .settings-reset:hover{background:#fff5f5!important;border-color:#c97a7a!important}
-
-@media(max-width:520px){
-  .settings-action-row{min-height:50px;padding:9px 0}
-  .settings-action-row:hover{padding-left:5px;padding-right:5px}
-  .settings-reset{width:100%!important;min-width:0;margin-top:18px!important}
-}
-
-/* ---------- Settings separator reduction polish ---------- */
-#settingsModal .settings-section{
-  border-top:0!important;
-  padding-top:8px!important;
-  margin-top:12px!important;
-}
-#settingsModal .settings-section-title{
-  margin-bottom:7px!important;
-}
-#settingsModal .settings-row{
-  border:0!important;
-  box-shadow:none!important;
-  background:#101711;
-}
-#settingsModal .settings-action-row{
-  border-top:0!important;
-  border-bottom:0!important;
-  box-shadow:none!important;
-}
-#settingsModal .settings-action-row + .settings-action-row{
-  border-top:0!important;
-}
-body.light-theme #settingsModal .settings-row{
-  background:#f7faf7;
-  border:0!important;
-}
-body.light-theme #settingsModal .settings-action-row{
-  border-top:0!important;
-  border-bottom:0!important;
-}
-#settingsModal .settings-section + .settings-section{
-  margin-top:14px!important;
-}
-#settingsModal .settings-reset{
-  border-width:1px!important;
-}
-@media(max-width:520px){
-  #settingsModal .settings-section{
-    margin-top:10px!important;
-    padding-top:6px!important;
-  }
-  #settingsModal .settings-section + .settings-section{
-    margin-top:11px!important;
-  }
-}
-</style>
