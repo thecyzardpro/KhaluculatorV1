@@ -628,41 +628,27 @@ body.light-theme .order{box-shadow:0 4px 14px rgba(31,55,37,.055)}
 @media(max-width:370px){.order-meta-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.order-title{font-size:11px}.order-price{font-size:13px}}
 
 
-/* ---------- Customer My Orders: clean product-style list ---------- */
-#myOrdersList{display:flex;flex-direction:column;gap:9px}
-#myOrdersList .my-order-item{
-  display:grid;grid-template-columns:64px minmax(0,1fr) auto;align-items:center;gap:10px;
-  padding:9px 10px;border:1px solid var(--order-border,#234b27);border-radius:11px;
-  background:var(--order-bg,#0a0f0b);box-shadow:0 4px 14px rgba(0,0,0,.07);min-width:0;
-}
-#myOrdersList .my-order-thumb{width:64px;height:64px;border-radius:9px;overflow:hidden;border:1px solid var(--order-border,#234b27);background:#101810;display:grid;place-items:center}
-#myOrdersList .my-order-thumb img{width:100%;height:100%;object-fit:cover;display:block}
-#myOrdersList .my-order-thumb-fallback{font-size:24px;opacity:.75}
-#myOrdersList .my-order-info{min-width:0}
-#myOrdersList .my-order-name{font-size:13px;font-weight:900;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--text)}
-#myOrdersList .my-order-sub{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:4px;min-width:0}
-#myOrdersList .my-order-date,#myOrdersList .my-order-id{font-size:9px;color:var(--muted);white-space:nowrap}
-#myOrdersList .my-order-address{margin-top:4px;font-size:10px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-#myOrdersList .my-order-right{display:flex;flex-direction:column;align-items:flex-end;justify-content:center;gap:5px;min-width:84px}
-#myOrdersList .my-order-price{font-size:14px;font-weight:950;color:var(--green);white-space:nowrap}
-#myOrdersList .my-order-right .status{font-size:8px;padding:4px 7px}
-#myOrdersList .my-order-actions{display:flex;align-items:center;gap:5px;margin-top:5px}
-#myOrdersList .my-order-actions .btn{padding:6px 8px;font-size:9px;border-radius:7px}
-#myOrdersList .my-order-actions .green{font-size:9px;white-space:nowrap}
-body.light-theme #myOrdersList .my-order-item{background:#fff;border-color:#cfe0d2;box-shadow:0 4px 14px rgba(31,55,37,.055)}
-body.light-theme #myOrdersList .my-order-thumb{background:#f0f4f0;border-color:#d2dfd4}
+/* ---------- Admin orders: product-style compact list ---------- */
+.admin-order-card{overflow:hidden}
+.admin-order-row{display:flex;align-items:center;gap:11px;padding:9px 10px}
+.admin-order-product-image{width:58px;height:58px;flex:0 0 58px;border-radius:9px;object-fit:cover;background:var(--card);border:1px solid var(--border)}
+.admin-order-product-placeholder{display:flex;align-items:center;justify-content:center;font-size:22px}
+.admin-order-content{min-width:0;flex:1}
+.admin-order-top{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.admin-order-title-wrap{min-width:0}
+.admin-order-customer{font-size:9px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}
+.admin-order-price-wrap{flex:0 0 auto;text-align:right}
+.admin-order-bottom{display:flex;align-items:center;gap:7px;margin-top:6px;min-width:0}
+.admin-order-payment{font-size:8px;font-weight:800;padding:4px 6px;border-radius:6px;background:var(--meta-bg,#f8faf8);border:1px solid var(--border);white-space:nowrap}
+.admin-order-address{font-size:8px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.admin-order-actions{margin-top:7px}
 @media(max-width:520px){
-  #myOrdersList .my-order-item{grid-template-columns:56px minmax(0,1fr) auto;gap:8px;padding:8px}
-  #myOrdersList .my-order-thumb{width:56px;height:56px}
-  #myOrdersList .my-order-name{font-size:12px}
-  #myOrdersList .my-order-price{font-size:13px}
-  #myOrdersList .my-order-right{min-width:72px}
-}
-@media(max-width:370px){
-  #myOrdersList .my-order-item{grid-template-columns:50px minmax(0,1fr) 68px;gap:7px}
-  #myOrdersList .my-order-thumb{width:50px;height:50px}
-  #myOrdersList .my-order-right{min-width:68px}
-  #myOrdersList .my-order-actions .btn{padding:5px 6px;font-size:8px}
+  .admin-order-row{gap:8px;padding:8px}
+  .admin-order-product-image{width:50px;height:50px;flex-basis:50px}
+  .admin-order-top{gap:6px}
+  .admin-order-customer{max-width:180px}
+  .admin-order-price-wrap .order-price{font-size:13px}
+  .admin-order-actions .btn{padding:6px 8px;font-size:9px}
 }
 
 /* ---------- Modern product potency / effects ---------- */
@@ -3872,37 +3858,52 @@ async function loadMyOrders(){
 
   
   list.innerHTML=data.map(o=>{
+  
     const unread=unreadMap[o.id]||0;
+  
+
+  
     const location=o.delivery_lat!=null
-      ? `<a class="green" target="_blank" rel="noopener" href="${mapLink(o.delivery_lat,o.delivery_lng)}">📍 Map</a>`
+  
+      ? `<a class="green" target="_blank" rel="noopener" href="${mapLink(o.delivery_lat,o.delivery_lng)}">📍 View map</a>`
+  
       : "";
-    const productImage=o.products?.image_url
-      ? `<img src="${esc(o.products.image_url)}" alt="${esc(o.products?.name||"Product")}" loading="lazy">`
-      : `<span class="my-order-thumb-fallback">🌿</span>`;
-    const address=(o.delivery_place_name||o.delivery_address||"No delivery address").trim();
+  
+
+  
     return `
-      <article class="my-order-item">
-        <div class="my-order-thumb">${productImage}</div>
-        <div class="my-order-info">
-          <div class="my-order-name">${esc(o.products?.name||"Product")}</div>
-          <div class="my-order-sub">
-            <span class="my-order-date">${fmtDate(o.created_at)}</span>
-            <span class="my-order-id">#${esc(String(o.id).slice(0,8).toUpperCase())}</span>
+  
+      <article class="order">
+        <div class="order-main">
+          <div class="order-head">
+            <div>
+              <div class="order-title">${esc(o.products?.name||"Product")}</div>
+              <div class="order-subtitle">Placed ${fmtDate(o.created_at)}</div>
+              <div class="order-id">Order #${esc(String(o.id).slice(0,8).toUpperCase())}</div>
+            </div>
+            <div>
+              <div class="order-price">${money(o.price_tzs)}</div>
+              <span class="status ${esc(o.status)}">${esc(o.status)}</span>
+            </div>
           </div>
-          <div class="my-order-address" title="${esc(address)}">${esc(address)}</div>
-          <div class="my-order-actions">
-            ${location}
-            ${o.status==="pending" ? `<button class="btn small" onclick="openChat('${o.id}')">💬 Chat${unread ? ` <span class="badge">${unread}</span>` : ""}</button>` : ""}
+          <div class="order-meta-grid">
+            <div class="order-meta"><span class="order-meta-label">Payment</span><span class="order-meta-value">${o.payment_method==="in_hand" ? "Pay in hand" : "Wallet"}</span></div>
+            <div class="order-meta"><span class="order-meta-label">Status</span><span class="order-meta-value">${esc(o.status)}</span></div>
           </div>
-        </div>
-        <div class="my-order-right">
-          <div class="my-order-price">${money(o.price_tzs)}</div>
-          <span class="status ${esc(o.status)}">${esc(o.status)}</span>
+          <div class="order-address"><div class="order-address-label">Delivery address</div><div class="order-address-value">${esc(o.delivery_address||"No text address")}</div></div>
+          <div class="order-actions">
+            ${location ? `<span>${location}</span>` : ""}
+            ${o.status==="pending" ? `<button class="btn small" onclick="openChat('${o.id}')">💬 Chat ${unread ? `<span class="badge">${unread}</span>` : ""}</button>` : ""}
+          </div>
         </div>
       </article>
+  
     `;
-  }).join("\n");
+  
+  }).join("");
+  
 
+  
   $("userUnreadTotal").textContent=
   
     Object.values(unreadMap).reduce((a,b)=>a+b,0);
@@ -4730,7 +4731,7 @@ async function loadAdminOrders(status,options={}){
   
           profiles(full_name,email),
   
-          products(name)
+          products(name,image_url)
   
         `)
   
@@ -4798,39 +4799,40 @@ async function loadAdminOrders(status,options={}){
   
 
   
+      const productImage=o.products?.image_url
+        ? `<img class="admin-order-product-image" src="${esc(o.products.image_url)}" alt="${esc(o.products?.name||"Product")}" loading="lazy">`
+        : `<div class="admin-order-product-image admin-order-product-placeholder">🛍️</div>`;
+
       return `
-  
-        <article class="order" data-admin-order-id="${esc(o.id)}">
-          <div class="order-main">
-            <div class="order-head">
-              <div>
-                <div class="order-title">${esc(o.products?.name||"Product")}</div>
-                <div class="admin-order-user">
-                  <span class="admin-order-avatar">${esc((o.profiles?.full_name||"U").trim().charAt(0).toUpperCase())}</span>
-                  <span class="admin-order-user-text"><span class="admin-order-user-name">${esc(o.profiles?.full_name||"Unknown")}</span><span class="admin-order-user-email">${esc(o.profiles?.email||"")}</span></span>
+        <article class="order admin-order-card" data-admin-order-id="${esc(o.id)}">
+          <div class="admin-order-row">
+            ${productImage}
+            <div class="admin-order-content">
+              <div class="admin-order-top">
+                <div class="admin-order-title-wrap">
+                  <div class="order-title">${esc(o.products?.name||"Product")}</div>
+                  <div class="admin-order-customer">${esc(o.profiles?.full_name||"Unknown")} · ${esc(o.profiles?.email||"")}</div>
+                  <div class="order-id">#${esc(String(o.id).slice(0,8).toUpperCase())} · ${fmtDate(o.created_at)}</div>
                 </div>
-                <div class="order-id">Order #${esc(String(o.id).slice(0,8).toUpperCase())} · ${fmtDate(o.created_at)}</div>
+                <div class="admin-order-price-wrap">
+                  <div class="order-price">${money(o.price_tzs)}</div>
+                  <span class="status ${esc(o.status)}">${esc(o.status)}</span>
+                </div>
               </div>
-              <div>
-                <div class="order-price">${money(o.price_tzs)}</div>
-                <span class="status ${esc(o.status)}">${esc(o.status)}</span>
+              <div class="admin-order-bottom">
+                <span class="admin-order-payment">${o.payment_method==="in_hand" ? "Pay in hand" : "Wallet"}</span>
+                <span class="admin-order-address">${esc(o.delivery_address||"No address")}</span>
               </div>
-            </div>
-            ${unread ? `<div class="order-message">NEW MESSAGE · ${unread}</div>` : ""}
-            <div class="order-meta-grid">
-              <div class="order-meta"><span class="order-meta-label">Payment</span><span class="order-meta-value">${o.payment_method==="in_hand" ? "Pay in hand" : "Wallet"}</span></div>
-              <div class="order-meta"><span class="order-meta-label">Customer</span><span class="order-meta-value">${esc(o.profiles?.full_name||"Unknown")}</span></div>
-            </div>
-            <div class="order-address"><div class="order-address-label">Delivery address</div><div class="order-address-value">${esc(o.delivery_address||"No text address")}</div></div>
-            <div class="order-actions">
-              ${status==="pending" ? `<button class="btn small" data-admin-chat-button onclick="openChat('${o.id}')">💬 Chat ${unread ? `<span class="badge">${unread}</span>` : ""}</button>` : ""}
-              ${mapBtn ? `<span>${mapBtn}</span>` : ""}
-              ${status==="delivered" ? `<label class="order-select"><input type="checkbox" class="delivered-order-check" value="${esc(o.id)}" onchange="updateDeliveredSelectionState()"> Select</label><button class="btn danger small" onclick="deleteDeliveredOrder('${esc(o.id)}')">Delete</button>` : ""}
-              ${status==="pending" ? `<button class="btn blue small" onclick="deliverOrder('${o.id}')">Verify & Deliver</button>` : ""}
+              ${unread ? `<div class="order-message">NEW MESSAGE · ${unread}</div>` : ""}
+              <div class="order-actions admin-order-actions">
+                ${status==="pending" ? `<button class="btn small" data-admin-chat-button onclick="openChat('${o.id}')">💬 Chat ${unread ? `<span class="badge">${unread}</span>` : ""}</button>` : ""}
+                ${mapBtn ? `<span>${mapBtn}</span>` : ""}
+                ${status==="delivered" ? `<label class="order-select"><input type="checkbox" class="delivered-order-check" value="${esc(o.id)}" onchange="updateDeliveredSelectionState()"> Select</label><button class="btn danger small" onclick="deleteDeliveredOrder('${esc(o.id)}')">Delete</button>` : ""}
+                ${status==="pending" ? `<button class="btn blue small" onclick="deliverOrder('${o.id}')">Verify & Deliver</button>` : ""}
+              </div>
             </div>
           </div>
         </article>
-  
       `;
   
     }).join("");
