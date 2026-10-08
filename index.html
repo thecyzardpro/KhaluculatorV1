@@ -2433,6 +2433,10 @@ async function init(){
    */
   
   sb.auth.onAuthStateChange(async (_event,session)=>{
+
+    try{
+      window.ReactNativeWebView?.postMessage(JSON.stringify({type:"KHALU_WEB_SESSION",event:_event,loggedIn:!!session?.user?.id}));
+    }catch(e){}
   
 
   
@@ -2644,6 +2648,7 @@ $("backToLoginBtn").onclick=async()=>{
   
   recoveryEmail="";
   
+  try{if(typeof window.__khaluDeactivatePushToken === "function")await window.__khaluDeactivatePushToken();}catch(e){}
   try{await sb.auth.signOut();}catch(e){}
   
   if(window.history?.replaceState){
@@ -2861,7 +2866,7 @@ async function updatePassword(){
 
   
   try{
-  
+    if(typeof window.__khaluDeactivatePushToken === "function")await window.__khaluDeactivatePushToken();
     await sb.auth.signOut();
   
   }catch(e){
@@ -3147,9 +3152,14 @@ $("logoutBtn").onclick=async()=>{
   stopAdminLiveRefresh();
   
   clearStoredLoginSession();
-  
 
-  
+  try{
+    if(typeof window.__khaluDeactivatePushToken === "function")
+      await window.__khaluDeactivatePushToken();
+  }catch(e){
+    console.warn("Push token logout:",e);
+  }
+
   await sb.auth.signOut();
   
   location.reload();
@@ -7397,7 +7407,7 @@ async function handleSessionRevoked(message){
 
   
   try{
-  
+    if(typeof window.__khaluDeactivatePushToken === "function")await window.__khaluDeactivatePushToken();
     await sb.auth.signOut();
   
   }catch(e){}
@@ -8415,7 +8425,12 @@ $("resetSettingsBtn")?.addEventListener("click",async()=>{localStorage.removeIte
 $("settingsModal")?.addEventListener("click",e=>{if(e.target.id==="settingsModal")window.closeKhaluSettings();});
 document.addEventListener("keydown",e=>{if(e.key==="Escape"){if(!$('changePasswordModal')?.classList.contains("hidden")){document.querySelector("#cancelChangePassword")?.click();}else if(!$('settingsModal')?.classList.contains("hidden")){window.closeKhaluSettings();}}});syncSettingsUI();if(getCurrency()==="USD")refreshUsdRate();});
 })();
-</script></body></html>
+
+<script>
+/* ---------- Native Android push bridge ---------- */
+window.__khaluDeactivatePushToken = window.__khaluDeactivatePushToken || (async()=>{});
+</script>
+</body></html>
 <style id="light-product-potency-effects-final">
 body.light-theme #productsList.product-view-list .product .product-potency{border-top:0;padding-top:2px;margin-top:1px}
 body.light-theme #productsList.product-view-list .effect-tag{background:#e8f4ea;border-color:#b9d6be;color:#176b2c}
